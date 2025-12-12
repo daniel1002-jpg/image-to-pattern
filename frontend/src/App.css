@@ -1,0 +1,46 @@
+#root { max-width: 1200px; margin: 0 auto; padding: 20px; font-family: 'Inter', sans-serif; }
+
+.controls-panel {
+  display: flex; gap: 20px; background: #2a2a2a; padding: 20px;
+  border-radius: 12px; align-items: flex-start; flex-wrap: wrap;
+  margin-bottom: 30px; color: white;
+}
+
+.control-group { display: flex; flex-direction: column; gap: 10px; min-width: 250px; }
+.slider-container { display: flex; justify-content: space-between; align-items: center; gap: 10px; }
+
+.generate-btn {
+  background: #e91e63; color: white; border: none; padding: 15px 30px;
+  font-size: 1rem; border-radius: 8px; cursor: pointer; height: fit-content; align-self: center;
+}
+.generate-btn:disabled { background: #555; cursor: not-allowed; }
+
+/* WORKSPACE */
+.workspace { display: grid; grid-template-columns: 200px 1fr; gap: 30px; align-items: start; }
+@media (max-width: 768px) { .workspace { grid-template-columns: 1fr; } }
+
+/* PALETA */
+.palette-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
+.swatch-item { display: flex; flex-direction: column; align-items: center; background: #f4f4f4; padding: 5px; border-radius: 4px; }
+.swatch-color { width: 30px; height: 30px; border-radius: 50%; border: 1px solid #ddd; }
+
+/* GRILLA */
+.grid-container {
+  display: grid; width: 100%; max-width: 800px; margin: 0 auto;
+  border: 4px solid #333; box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+}
+
+.pixel-cell {
+  aspect-ratio: 1/1; width: 100%; cursor: crosshair;
+  transition: opacity 0.2s ease;
+}
+
+/* EFECTO TRACKER */
+.pixel-cell.dimmed {
+  opacity: 0.15; /* Las filas que no tejes se ven casi transparentes */
+}
+
+.tracker-info {
+  text-align: center; background: #333; color: white;
+  padding: 10px; margin-top: 10px; border-radius: 8px;
+}
