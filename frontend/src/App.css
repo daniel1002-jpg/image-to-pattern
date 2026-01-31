@@ -46,6 +46,18 @@
   filter: grayscale(50%);
 }
 
+/* ESCENARIO 3: Contador de progreso */
+.progress-counter {
+  text-align: center;
+  background: #4CAF50;
+  color: white;
+  padding: 12px;
+  margin-top: 15px;
+  border-radius: 8px;
+  font-size: 1.1rem;
+  font-weight: bold;
+}
+
 .tracker-info {
   text-align: center; background: #333; color: white;
   padding: 10px; margin-top: 10px; border-radius: 8px;

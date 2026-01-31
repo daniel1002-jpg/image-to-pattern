@@ -209,3 +209,117 @@ describe('Escenario 2: Desmarcar una fila', () => {
     expect(screen.getByTestId('pixel-cell-2-0')).toHaveClass('completed-row');
   });
 });
+
+/**
+ * TESTS PARA ESCENARIO 3: Indicador de progreso
+ * 
+ * Issue #1 - Criterios de aceptación:
+ * - DADO que tengo filas marcadas
+ * - CUANDO visualizo el patrón
+ * - ENTONCES debo ver un contador que muestre "X de Y filas completadas"
+ */
+describe('Escenario 3: Indicador de progreso', () => {
+  
+  const mockPatternData = {
+    status: 'success',
+    dimensions: { width: 5, height: 4 },
+    palette: ['#FF0000', '#00FF00', '#0000FF'],
+    grid: [
+      [0, 1, 2, 0, 1],
+      [1, 2, 0, 1, 2],
+      [2, 0, 1, 2, 0],
+      [0, 1, 2, 0, 1],
+    ],
+  };
+
+  beforeEach(() => {
+    global.fetch = vi.fn(() =>
+      Promise.resolve({
+        json: () => Promise.resolve(mockPatternData),
+        ok: true,
+      } as Response)
+    );
+  });
+
+  it('DADO: debe mostrar contador inicial "0 de Y filas completadas"', async () => {
+    render(<App />);
+    
+    // Setup: Generar patrón
+    const fileInput = screen.getByTitle('file');
+    fireEvent.change(fileInput, { target: { files: [new File([''], 'test.png')] } });
+    fireEvent.click(screen.getByText(/Generar Patrón/i));
+    await waitFor(() => screen.getByText(/Vista Previa/i));
+
+    // EXPECT: Contador debe mostrar "0 de 4 filas completadas"
+    expect(screen.getByText(/0 de 4 filas completadas/i)).toBeInTheDocument();
+  });
+
+  it('CUANDO: marco filas ENTONCES el contador debe actualizarse', async () => {
+    render(<App />);
+    
+    // Setup
+    const fileInput = screen.getByTitle('file');
+    fireEvent.change(fileInput, { target: { files: [new File([''], 'test.png')] } });
+    fireEvent.click(screen.getByText(/Generar Patrón/i));
+    await waitFor(() => screen.getByText(/Vista Previa/i));
+
+    // Inicialmente: 0 de 4
+    expect(screen.getByText(/0 de 4 filas completadas/i)).toBeInTheDocument();
+
+    // ACTION: Marcar fila 0
+    fireEvent.click(screen.getByTestId('pixel-cell-0-0'));
+    
+    // EXPECT: 1 de 4
+    expect(screen.getByText(/1 de 4 filas completadas/i)).toBeInTheDocument();
+
+    // ACTION: Marcar fila 2
+    fireEvent.click(screen.getByTestId('pixel-cell-2-0'));
+    
+    // EXPECT: 2 de 4
+    expect(screen.getByText(/2 de 4 filas completadas/i)).toBeInTheDocument();
+
+    // ACTION: Marcar fila 1 y 3
+    fireEvent.click(screen.getByTestId('pixel-cell-1-0'));
+    fireEvent.click(screen.getByTestId('pixel-cell-3-0'));
+    
+    // EXPECT: 4 de 4 (todas completadas)
+    expect(screen.getByText(/4 de 4 filas completadas/i)).toBeInTheDocument();
+  });
+
+  it('Y: el contador debe decrementar al desmarcar filas', async () => {
+    render(<App />);
+    
+    // Setup
+    const fileInput = screen.getByTitle('file');
+    fireEvent.change(fileInput, { target: { files: [new File([''], 'test.png')] } });
+    fireEvent.click(screen.getByText(/Generar Patrón/i));
+    await waitFor(() => screen.getByText(/Vista Previa/i));
+
+    // Marcar 3 filas
+    fireEvent.click(screen.getByTestId('pixel-cell-0-0'));
+    fireEvent.click(screen.getByTestId('pixel-cell-1-0'));
+    fireEvent.click(screen.getByTestId('pixel-cell-2-0'));
+    
+    // Verificar: 3 de 4
+    expect(screen.getByText(/3 de 4 filas completadas/i)).toBeInTheDocument();
+
+    // ACTION: Desmarcar fila 1
+    fireEvent.click(screen.getByTestId('pixel-cell-1-0'));
+
+    // EXPECT: 2 de 4
+    expect(screen.getByText(/2 de 4 filas completadas/i)).toBeInTheDocument();
+  });
+
+  it('Y: el contador debe reflejar el total correcto de filas del patrón', async () => {
+    render(<App />);
+    
+    // Setup
+    const fileInput = screen.getByTitle('file');
+    fireEvent.change(fileInput, { target: { files: [new File([''], 'test.png')] } });
+    fireEvent.click(screen.getByText(/Generar Patrón/i));
+    await waitFor(() => screen.getByText(/Vista Previa/i));
+
+    // EXPECT: El denominador debe ser 4 (grid tiene 4 filas)
+    expect(screen.getByText(/de 4 filas completadas/i)).toBeInTheDocument();
+  });
+});

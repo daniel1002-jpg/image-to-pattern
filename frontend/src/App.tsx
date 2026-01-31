@@ -165,6 +165,12 @@ function App() {
                 })
               ))}
             </div>
+            
+            {/* ESCENARIO 3: Contador de progreso */}
+            <p className="progress-counter">
+              {completedRows.size} de {pattern.grid.length} filas completadas
+            </p>
+            
             {activeRow !== null && (
                <p className="tracker-info">Tejiendo Fila: <strong>{activeRow + 1}</strong></p>
             )}
