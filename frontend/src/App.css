@@ -40,6 +40,12 @@
   opacity: 0.15; /* Las filas que no tejes se ven casi transparentes */
 }
 
+/* ESCENARIO 1: Fila completada */
+.pixel-cell.completed-row {
+  opacity: 0.5;
+  filter: grayscale(50%);
+}
+
 .tracker-info {
   text-align: center; background: #333; color: white;
   padding: 10px; margin-top: 10px; border-radius: 8px;

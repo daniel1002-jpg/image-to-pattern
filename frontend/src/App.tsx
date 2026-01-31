@@ -22,6 +22,9 @@ function App() {
   
   // NUEVO ESTADO: Tracker de tejido
   const [activeRow, setActiveRow] = useState<number | null>(null);
+  
+  // ESCENARIO 1: Estado para filas completadas
+  const [completedRows, setCompletedRows] = useState<Set<number>>(new Set());
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
@@ -30,12 +33,26 @@ function App() {
     }
   };
 
+  // ESCENARIO 1: Toggle row completion
+  const toggleRowCompletion = (rowIndex: number) => {
+    setCompletedRows((prev) => {
+      const newSet = new Set(prev);
+      if (newSet.has(rowIndex)) {
+        newSet.delete(rowIndex);
+      } else {
+        newSet.add(rowIndex);
+      }
+      return newSet;
+    });
+  };
+
   const handleGenerate = async () => {
     if (!selectedFile) return;
 
     setIsLoading(true);
     setPattern(null);
     setActiveRow(null);
+    setCompletedRows(new Set()); // Limpiar filas completadas
 
     const formData = new FormData();
     formData.append('file', selectedFile);
@@ -132,14 +149,17 @@ function App() {
                 row.map((colorIndex, colIndex) => {
                    // Si hay una fila activa y NO es esta, la oscurecemos (opacity)
                    const isDimmed = activeRow !== null && activeRow !== rowIndex;
+                   // ESCENARIO 1: Verificar si la fila está completada
+                   const isCompleted = completedRows.has(rowIndex);
                    
                    return (
                     <div 
                       key={`${rowIndex}-${colIndex}`}
-                      className={`pixel-cell ${isDimmed ? 'dimmed' : ''}`}
+                      className={`pixel-cell ${isDimmed ? 'dimmed' : ''} ${isCompleted ? 'completed-row' : ''}`}
                       style={{ backgroundColor: pattern.palette[colorIndex] }}
-                      onClick={() => setActiveRow(rowIndex)} // Click activa la fila
+                      onClick={() => toggleRowCompletion(rowIndex)} // ESCENARIO 1: Toggle completion
                       title={`Fila ${rowIndex + 1}, Color ${colorIndex}`}
+                      data-testid={`pixel-cell-${rowIndex}-${colIndex}`}
                     />
                    )
                 })
