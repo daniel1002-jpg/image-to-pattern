@@ -1,15 +1,35 @@
 # 🧶 Image-to-Pattern
 
-Convierte imágenes en patrones de tejido interactivos. Una herramienta que transforma cualquier foto en una grilla de colores optimizada para proyectos de tejido, bordado o pixel art.
+Aplicación web que convierte imágenes en patrones de tejido cuadriculados (pixel art/granny squares). Un puente entre el diseño digital y la ejecución física del tejido, resolviendo fricciones que las herramientas actuales ignoran.
 
-## 🎯 Características
+## 🎯 Propuesta de Valor
 
-- **Carga de imágenes**: Soporta PNG, JPG y otros formatos comunes
-- **Ajuste dinámico**: Controla el ancho del patrón (20-100 puntos) y la cantidad de colores (2-16)
-- **Reducción inteligente de colores**: Usa KMeans clustering para encontrar la paleta óptima
-- **Vista previa interactiva**: Visualiza el patrón con paleta de colores clara
-- **Tracker de tejido**: Marca filas mientras tejes para seguir tu progreso
-- **Responsive**: Funciona en desktop y dispositivos móviles
+Mientras que herramientas como **Stitch Fiddle** tienen UX compleja y apps de pixel art generan paletas de colores irreales, **Image-to-Pattern** combina:
+
+- **Backend robusto**: Algoritmos científicos (K-Means clustering) para reducción de colores inteligente
+- **Conocimiento de dominio**: Enfocado en las necesidades reales de tejedores
+
+### Pain Points que Resolvemos
+
+1. **El Abismo del Color**: Las apps convierten a códigos Hex/RGB que no existen en mercerías
+2. **Parálisis por Configuración**: Exceso de parámetros técnicos antes de ver resultados
+3. **Experiencia Estática**: PDFs que dificultan seguir el progreso al tejer
+
+## ✨ Características (MVP)
+
+- **Upload simple**: Drag & Drop de imágenes PNG, JPG y otros formatos
+- **Reducción automática de colores**: Quantization usando K-Means (5-10 colores dominantes)
+- **Pixelado ajustable**: Controla la resolución del patrón (20-100 puntos)
+- **Visualización interactiva**: Grilla renderizada en pantalla con paleta de colores
+- **Sin autenticación**: Todo en sesión temporal (sin login necesario)
+
+### 🚀 Roadmap de Features Futuros
+
+**OUT del MVP actual** (dejado para versiones posteriores):
+- ❌ Cuentas de usuario y guardado en la nube
+- ❌ Editor manual (pintar pixel a pixel)
+- ❌ Generación de PDF
+- ❌ Base de datos de marcas de lanas reales
 
 ## 📋 Requisitos
 
@@ -47,7 +67,7 @@ Aplicación en: `http://localhost:5173`
 ├── backend/
 │   ├── main.py                 # API FastAPI
 │   └── services/
-│       └── image_processor.py  # Lógica de procesamiento
+│       └── image_processor.py  # Lógica de procesamiento con K-Means
 ├── frontend/
 │   ├── src/
 │   │   ├── App.tsx             # Componente principal
@@ -57,14 +77,13 @@ Aplicación en: `http://localhost:5173`
 └── README.md
 ```
 
-## 🔄 Flujo de la Aplicación
+## 🔄 Flujo del Pipeline de Datos
 
-1. Selecciona una imagen desde tu dispositivo
-2. Configura parámetros:
-   - **Ancho**: Determina la resolución del patrón (20-100)
-   - **Colores**: Reduce la complejidad de la paleta (2-16)
-3. Genera el patrón (el backend procesa la imagen)
-4. Visualiza el resultado y sigue el progreso haciendo click en las filas
+1. **Upload**: Usuario sube imagen → Frontend envía a API (Multipart)
+2. **Pre-process**: Backend redimensiona (ej. 100x100 px) para ajustar al tamaño de una manta real
+3. **Quantization**: K-Means agrupa los píxeles en bloques de color sólido
+4. **Response**: Backend devuelve matriz JSON `[[color_id, hex], ...]` al Frontend
+5. **Render**: Frontend dibuja la grilla basándose en la matriz
 
 ## 🛠️ API Endpoints
 
@@ -90,17 +109,35 @@ Procesa una imagen y retorna el patrón.
 }
 ```
 
-## 🎨 Stack Tecnológico
+## 🎨 Stack Tecnológico: "Python Powerhouse"
 
-| Capa | Tecnología | Versión |
-|------|------------|---------|
-| Backend | FastAPI | 0.100+ |
-| Frontend | React | 19 |
-| Lenguaje | TypeScript/Python | 5.9/3.8+ |
-| Build | Vite | 7 |
-| ML | scikit-learn | 1.3+ |
+| Capa | Tecnología | Versión | Razón de Elección |
+|------|------------|---------|-------------------|
+| Backend | FastAPI | 0.100+ | Asíncrono, rápido, con Swagger automático |
+| Frontend | React | 19 | Optimización para grillas grandes |
+| Lenguaje | TypeScript/Python | 5.9/3.8+ | Tipado fuerte + ecosistema científico |
+| Build | Vite | 7 | Desarrollo rápido |
+| Procesamiento | Pillow (PIL) | Latest | Manipulación de imágenes |
+| ML | scikit-learn | 1.3+ | K-Means clustering para reducción de colores |
 
-## 📝 Convenciones
+### ¿Por qué Python en el Backend?
+
+Decisión estratégica: Python tiene un **ecosistema científico superior** a Node.js para procesamiento de imágenes y algoritmos ML (Pillow + scikit-learn).
+
+## 🏢 Estrategia: "Product-Led Portfolio"
+
+Este proyecto adopta un enfoque híbrido:
+
+- **Calidad de Código**: Estándares de ingeniería altos (Clean Code) para portafolio profesional
+- **Funcionalidad Real**: Producto usable por usuarios finales, no solo una demo estática
+- **Infraestructura $0**: Despliegue con Vercel (Frontend) + Render/Railway (Backend)
+
+## 💼 Modelo de Negocio Potencial
+
+- **Marketing de Afiliados**: Recomendar lanas exactas con links a Amazon/MercadoLibre
+- **Freemium**: Uso gratuito web, micro-pago por descargar PDF de alta calidad
+
+## 📝 Convenciones de Commit
 
 Seguimos **Conventional Commits**:
 
@@ -110,7 +147,7 @@ Seguimos **Conventional Commits**:
 
 Tipos: `feat`, `fix`, `docs`, `style`, `refactor`, `test`, `chore`
 
-Ejemplo: `feat: add row tracker functionality`
+**Ejemplo**: `feat: add kmeans color quantization`
 
 ## 🔄 Flujo de Trabajo con Ramas
 
@@ -123,6 +160,14 @@ main
 
 Crear rama: `git checkout -b feature/nueva-funcionalidad`
 
+## 📊 Análisis de Competencia
+
+| Herramienta | Fortaleza | Debilidad |
+|-------------|-----------|-----------|
+| Stitch Fiddle | Muy robusto | UX compleja, curva de aprendizaje alta |
+| Wooltara | Buena UX/UI | Débil en generación técnica de patrones |
+| Apps Pixel Art | Algoritmos potentes | Inutilizables para tejedores (paletas irreales) |
+
 ## 📄 Licencia
 
 MIT - © 2025 Daniel Mamani
@@ -133,3 +178,5 @@ MIT - © 2025 Daniel Mamani
 - Backend corre en `http://127.0.0.1:8000`
 - Puertos 5173 (frontend) y 8000 (backend) disponibles
 - Dependencias instaladas correctamente
+
+**Documentación completa del proyecto**: [Project Charter en Notion](https://www.notion.so/Project-Charter-Image-to-Pattern-MVP-2b1d181de3ba8005aaf4ecf556352bf5)
