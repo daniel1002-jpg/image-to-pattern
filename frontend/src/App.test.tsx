@@ -109,3 +109,103 @@ describe('Escenario 1: Marcar una fila como completada', () => {
     expect(screen.getByTestId('pixel-cell-1-0')).not.toHaveClass('completed-row');
   });
 });
+
+/**
+ * TESTS PARA ESCENARIO 2: Desmarcar una fila
+ * 
+ * Issue #1 - Criterios de aceptación:
+ * - DADO que tengo una fila marcada como completada
+ * - CUANDO vuelvo a hacer click en esa fila
+ * - ENTONCES la fila debe volver a su estado original (desmarcarse)
+ */
+describe('Escenario 2: Desmarcar una fila', () => {
+  
+  const mockPatternData = {
+    status: 'success',
+    dimensions: { width: 5, height: 3 },
+    palette: ['#FF0000', '#00FF00', '#0000FF'],
+    grid: [
+      [0, 1, 2, 0, 1],
+      [1, 2, 0, 1, 2],
+      [2, 0, 1, 2, 0],
+    ],
+  };
+
+  beforeEach(() => {
+    global.fetch = vi.fn(() =>
+      Promise.resolve({
+        json: () => Promise.resolve(mockPatternData),
+        ok: true,
+      } as Response)
+    );
+  });
+
+  it('DADO: debe tener una fila marcada como completada', async () => {
+    render(<App />);
+    
+    // Setup: Generar patrón y marcar fila 1
+    const fileInput = screen.getByTitle('file');
+    fireEvent.change(fileInput, { target: { files: [new File([''], 'test.png')] } });
+    fireEvent.click(screen.getByText(/Generar Patrón/i));
+    await waitFor(() => screen.getByText(/Vista Previa/i));
+
+    // Marcar fila 1
+    fireEvent.click(screen.getByTestId('pixel-cell-1-0'));
+
+    // Verificar que está marcada
+    expect(screen.getByTestId('pixel-cell-1-0')).toHaveClass('completed-row');
+    expect(screen.getByTestId('pixel-cell-1-4')).toHaveClass('completed-row');
+  });
+
+  it('CUANDO: vuelvo a hacer click en la fila marcada ENTONCES debe desmarcarse', async () => {
+    render(<App />);
+    
+    // Setup: Generar patrón
+    const fileInput = screen.getByTitle('file');
+    fireEvent.change(fileInput, { target: { files: [new File([''], 'test.png')] } });
+    fireEvent.click(screen.getByText(/Generar Patrón/i));
+    await waitFor(() => screen.getByText(/Vista Previa/i));
+
+    // Marcar fila 2
+    const cellRow2 = screen.getByTestId('pixel-cell-2-0');
+    fireEvent.click(cellRow2);
+    
+    // Verificar que está marcada
+    expect(cellRow2).toHaveClass('completed-row');
+
+    // ACTION: Click de nuevo en la misma fila
+    fireEvent.click(cellRow2);
+
+    // EXPECT: La fila debe desmarcarse
+    expect(cellRow2).not.toHaveClass('completed-row');
+    expect(screen.getByTestId('pixel-cell-2-4')).not.toHaveClass('completed-row');
+  });
+
+  it('Y: desmarcar una fila NO debe afectar otras filas marcadas', async () => {
+    render(<App />);
+    
+    // Setup
+    const fileInput = screen.getByTitle('file');
+    fireEvent.change(fileInput, { target: { files: [new File([''], 'test.png')] } });
+    fireEvent.click(screen.getByText(/Generar Patrón/i));
+    await waitFor(() => screen.getByText(/Vista Previa/i));
+
+    // Marcar filas 0, 1 y 2
+    fireEvent.click(screen.getByTestId('pixel-cell-0-0'));
+    fireEvent.click(screen.getByTestId('pixel-cell-1-0'));
+    fireEvent.click(screen.getByTestId('pixel-cell-2-0'));
+
+    // Todas deben estar marcadas
+    expect(screen.getByTestId('pixel-cell-0-0')).toHaveClass('completed-row');
+    expect(screen.getByTestId('pixel-cell-1-0')).toHaveClass('completed-row');
+    expect(screen.getByTestId('pixel-cell-2-0')).toHaveClass('completed-row');
+
+    // ACTION: Desmarcar solo la fila 1
+    fireEvent.click(screen.getByTestId('pixel-cell-1-0'));
+
+    // EXPECT: Fila 1 desmarcada, filas 0 y 2 siguen marcadas
+    expect(screen.getByTestId('pixel-cell-1-0')).not.toHaveClass('completed-row');
+    expect(screen.getByTestId('pixel-cell-0-0')).toHaveClass('completed-row');
+    expect(screen.getByTestId('pixel-cell-2-0')).toHaveClass('completed-row');
+  });
+});
