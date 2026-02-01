@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useRowTracker } from './hooks/useRowTracker';
 import './App.css';
 
 interface PatternData {
@@ -16,15 +17,15 @@ function App() {
   const [pattern, setPattern] = useState<PatternData | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   
-  // NUEVOS ESTADOS: Configuración
+  // Configuración del patrón
   const [width, setWidth] = useState(50);
   const [nColors, setNColors] = useState(5);
   
-  // NUEVO ESTADO: Tracker de tejido
+  // Tracker de la fila activa (antigua funcionalidad)
   const [activeRow, setActiveRow] = useState<number | null>(null);
   
-  // ESCENARIO 1: Estado para filas completadas
-  const [completedRows, setCompletedRows] = useState<Set<number>>(new Set());
+  // Custom hook para gestionar el tracker de filas completadas
+  const rowTracker = useRowTracker(pattern?.grid.length || 0);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
@@ -33,31 +34,13 @@ function App() {
     }
   };
 
-  // ESCENARIO 1: Toggle row completion
-  const toggleRowCompletion = (rowIndex: number) => {
-    setCompletedRows((prev) => {
-      const newSet = new Set(prev);
-      if (newSet.has(rowIndex)) {
-        newSet.delete(rowIndex);
-      } else {
-        newSet.add(rowIndex);
-      }
-      return newSet;
-    });
-  };
-
-  // ESCENARIO 4: Reset progress
-  const resetProgress = () => {
-    setCompletedRows(new Set());
-  };
-
   const handleGenerate = async () => {
     if (!selectedFile) return;
 
     setIsLoading(true);
     setPattern(null);
     setActiveRow(null);
-    setCompletedRows(new Set()); // Limpiar filas completadas
+    rowTracker.clearProgress(); // Limpiar filas completadas
 
     const formData = new FormData();
     formData.append('file', selectedFile);
@@ -155,14 +138,14 @@ function App() {
                    // Si hay una fila activa y NO es esta, la oscurecemos (opacity)
                    const isDimmed = activeRow !== null && activeRow !== rowIndex;
                    // ESCENARIO 1: Verificar si la fila está completada
-                   const isCompleted = completedRows.has(rowIndex);
+                   const isCompleted = rowTracker.isRowCompleted(rowIndex);
                    
                    return (
                     <div 
                       key={`${rowIndex}-${colIndex}`}
                       className={`pixel-cell ${isDimmed ? 'dimmed' : ''} ${isCompleted ? 'completed-row' : ''}`}
                       style={{ backgroundColor: pattern.palette[colorIndex] }}
-                      onClick={() => toggleRowCompletion(rowIndex)} // ESCENARIO 1: Toggle completion
+                      onClick={() => rowTracker.toggleRowCompletion(rowIndex)} // Toggle completion via hook
                       title={`Fila ${rowIndex + 1}, Color ${colorIndex}`}
                       data-testid={`pixel-cell-${rowIndex}-${colIndex}`}
                     />
@@ -173,13 +156,13 @@ function App() {
             
             {/* ESCENARIO 3: Contador de progreso */}
             <p className="progress-counter">
-              {completedRows.size} de {pattern.grid.length} filas completadas
+              {rowTracker.completedCount} de {rowTracker.totalRows} filas completadas
             </p>
             
             {/* ESCENARIO 4: Botón de reset */}
             <button 
               className="reset-btn"
-              onClick={resetProgress}
+              onClick={rowTracker.resetProgress}
               aria-label="Reset Progress"
             >
               Reset Progress
