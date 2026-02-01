@@ -58,6 +58,24 @@
   font-weight: bold;
 }
 
+/* ESCENARIO 4: Botón de reset */
+.reset-btn {
+  display: block;
+  margin: 15px auto 0;
+  background: #f44336;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  font-size: 0.95rem;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.reset-btn:hover {
+  background: #d32f2f;
+}
+
 .tracker-info {
   text-align: center; background: #333; color: white;
   padding: 10px; margin-top: 10px; border-radius: 8px;

@@ -46,6 +46,11 @@ function App() {
     });
   };
 
+  // ESCENARIO 4: Reset progress
+  const resetProgress = () => {
+    setCompletedRows(new Set());
+  };
+
   const handleGenerate = async () => {
     if (!selectedFile) return;
 
@@ -170,6 +175,15 @@ function App() {
             <p className="progress-counter">
               {completedRows.size} de {pattern.grid.length} filas completadas
             </p>
+            
+            {/* ESCENARIO 4: Botón de reset */}
+            <button 
+              className="reset-btn"
+              onClick={resetProgress}
+              aria-label="Reset Progress"
+            >
+              Reset Progress
+            </button>
             
             {activeRow !== null && (
                <p className="tracker-info">Tejiendo Fila: <strong>{activeRow + 1}</strong></p>

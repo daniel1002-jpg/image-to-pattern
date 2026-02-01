@@ -323,3 +323,126 @@ describe('Escenario 3: Indicador de progreso', () => {
     expect(screen.getByText(/de 4 filas completadas/i)).toBeInTheDocument();
   });
 });
+
+/**
+ * TESTS PARA ESCENARIO 4: Reset del tracker
+ * 
+ * Issue #1 - Criterios de aceptación:
+ * - DADO que tengo filas marcadas
+ * - CUANDO hago click en un botón "Reset Progress"
+ * - ENTONCES todas las filas deben desmarcarse
+ * - Y el contador debe volver a "0 de Y filas completadas"
+ */
+describe('Escenario 4: Reset del tracker', () => {
+  
+  const mockPatternData = {
+    status: 'success',
+    dimensions: { width: 5, height: 3 },
+    palette: ['#FF0000', '#00FF00', '#0000FF'],
+    grid: [
+      [0, 1, 2, 0, 1],
+      [1, 2, 0, 1, 2],
+      [2, 0, 1, 2, 0],
+    ],
+  };
+
+  beforeEach(() => {
+    global.fetch = vi.fn(() =>
+      Promise.resolve({
+        json: () => Promise.resolve(mockPatternData),
+        ok: true,
+      } as Response)
+    );
+  });
+
+  it('DADO: debe existir un botón "Reset Progress"', async () => {
+    render(<App />);
+    
+    // Setup: Generar patrón
+    const fileInput = screen.getByTitle('file');
+    fireEvent.change(fileInput, { target: { files: [new File([''], 'test.png')] } });
+    fireEvent.click(screen.getByText(/Generar Patrón/i));
+    await waitFor(() => screen.getByText(/Vista Previa/i));
+
+    // EXPECT: Debe existir el botón de reset
+    expect(screen.getByRole('button', { name: /reset progress/i })).toBeInTheDocument();
+  });
+
+  it('CUANDO: hago click en "Reset Progress" ENTONCES todas las filas deben desmarcarse', async () => {
+    render(<App />);
+    
+    // Setup: Generar patrón y marcar filas
+    const fileInput = screen.getByTitle('file');
+    fireEvent.change(fileInput, { target: { files: [new File([''], 'test.png')] } });
+    fireEvent.click(screen.getByText(/Generar Patrón/i));
+    await waitFor(() => screen.getByText(/Vista Previa/i));
+
+    // Marcar todas las filas
+    fireEvent.click(screen.getByTestId('pixel-cell-0-0'));
+    fireEvent.click(screen.getByTestId('pixel-cell-1-0'));
+    fireEvent.click(screen.getByTestId('pixel-cell-2-0'));
+
+    // Verificar que están marcadas
+    expect(screen.getByTestId('pixel-cell-0-0')).toHaveClass('completed-row');
+    expect(screen.getByTestId('pixel-cell-1-0')).toHaveClass('completed-row');
+    expect(screen.getByTestId('pixel-cell-2-0')).toHaveClass('completed-row');
+
+    // ACTION: Click en reset
+    const resetButton = screen.getByRole('button', { name: /reset progress/i });
+    fireEvent.click(resetButton);
+
+    // EXPECT: Todas las filas deben estar desmarcadas
+    expect(screen.getByTestId('pixel-cell-0-0')).not.toHaveClass('completed-row');
+    expect(screen.getByTestId('pixel-cell-1-0')).not.toHaveClass('completed-row');
+    expect(screen.getByTestId('pixel-cell-2-0')).not.toHaveClass('completed-row');
+  });
+
+  it('Y: el contador debe volver a "0 de Y filas completadas"', async () => {
+    render(<App />);
+    
+    // Setup
+    const fileInput = screen.getByTitle('file');
+    fireEvent.change(fileInput, { target: { files: [new File([''], 'test.png')] } });
+    fireEvent.click(screen.getByText(/Generar Patrón/i));
+    await waitFor(() => screen.getByText(/Vista Previa/i));
+
+    // Marcar 2 filas
+    fireEvent.click(screen.getByTestId('pixel-cell-0-0'));
+    fireEvent.click(screen.getByTestId('pixel-cell-2-0'));
+
+    // Verificar contador: 2 de 3
+    expect(screen.getByText(/2 de 3 filas completadas/i)).toBeInTheDocument();
+
+    // ACTION: Reset
+    const resetButton = screen.getByRole('button', { name: /reset progress/i });
+    fireEvent.click(resetButton);
+
+    // EXPECT: Contador debe ser 0 de 3
+    expect(screen.getByText(/0 de 3 filas completadas/i)).toBeInTheDocument();
+  });
+
+  it('Y: el botón debe funcionar múltiples veces', async () => {
+    render(<App />);
+    
+    // Setup
+    const fileInput = screen.getByTitle('file');
+    fireEvent.change(fileInput, { target: { files: [new File([''], 'test.png')] } });
+    fireEvent.click(screen.getByText(/Generar Patrón/i));
+    await waitFor(() => screen.getByText(/Vista Previa/i));
+
+    const resetButton = screen.getByRole('button', { name: /reset progress/i });
+
+    // Ciclo 1: Marcar y resetear
+    fireEvent.click(screen.getByTestId('pixel-cell-0-0'));
+    expect(screen.getByText(/1 de 3 filas completadas/i)).toBeInTheDocument();
+    fireEvent.click(resetButton);
+    expect(screen.getByText(/0 de 3 filas completadas/i)).toBeInTheDocument();
+
+    // Ciclo 2: Marcar de nuevo y resetear de nuevo
+    fireEvent.click(screen.getByTestId('pixel-cell-1-0'));
+    fireEvent.click(screen.getByTestId('pixel-cell-2-0'));
+    expect(screen.getByText(/2 de 3 filas completadas/i)).toBeInTheDocument();
+    fireEvent.click(resetButton);
+    expect(screen.getByText(/0 de 3 filas completadas/i)).toBeInTheDocument();
+  });
+});
