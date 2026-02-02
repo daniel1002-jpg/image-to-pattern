@@ -68,10 +68,17 @@ export const usePatternPan = (
     }
   }, [canPan]);
 
+  // Reset pan state
+  const resetPan = () => {
+    setPanX(0);
+    setPanY(0);
+  };
+
   return {
     panX,
     panY,
     isDragging,
     canPan,
+    resetPan,
   };
 };

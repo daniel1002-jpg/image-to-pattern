@@ -39,6 +39,8 @@ function App() {
     if (e.target.files && e.target.files[0]) {
       setSelectedFile(e.target.files[0]);
       setPattern(null); // Limpiar resultado anterior
+      zoom.resetZoom();
+      pan.resetPan();
     }
   };
 
@@ -49,6 +51,8 @@ function App() {
     setPattern(null);
     setActiveRow(null);
     rowTracker.clearProgress(); // Limpiar filas completadas
+    zoom.resetZoom();
+    pan.resetPan();
 
     const formData = new FormData();
     formData.append('file', selectedFile);
