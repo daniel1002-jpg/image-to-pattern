@@ -82,3 +82,33 @@ NO hagas esto:
 - Usar palabras clave en minúsculas o mal escritas
 
 ***Escribe los commits en inglés***
+
+## Creación de Pull Requests (IMPORTANTE)
+
+**Estructura del PR:**
+- Título descriptivo siguiendo Conventional Commits
+- Cuerpo con overview y features implementadas
+- Testing summary (# tests, estado)
+- Code quality notes (refactoring, mejoras)
+- **NO incluir lista de commits** (GitHub los muestra automáticamente)
+- Incluir "closes #N" una sola vez al final
+
+**Ejemplo de cuerpo de PR:**
+```
+## 🎯 Overview
+Brief description of what was implemented.
+
+## ✨ Features Implemented
+- Feature 1
+- Feature 2
+
+## 🧪 Testing
+- X tests passing
+- No regressions
+
+## 🔗 Closes
+Closes #N
+```
+
+**Nota sobre Squash and Merge:**
+Cuando uses "squash and merge", solo necesitas **un "closes #N"** en el mensaje final del squash. Los "closes" individuales en cada commit del PR son redundantes.
