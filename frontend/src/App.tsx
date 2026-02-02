@@ -1,5 +1,6 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { useRowTracker } from './hooks/useRowTracker';
+import { usePatternZoom } from './hooks/usePatternZoom';
 import './App.css';
 
 interface PatternData {
@@ -26,6 +27,10 @@ function App() {
   
   // Custom hook para gestionar el tracker de filas completadas
   const rowTracker = useRowTracker(pattern?.grid.length || 0);
+
+  // Ref for pattern grid and zoom hook
+  const patternGridRef = useRef<HTMLDivElement>(null!);
+  const zoom = usePatternZoom(patternGridRef, Boolean(pattern));
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
@@ -126,10 +131,21 @@ function App() {
           {/* PATRÓN INTERACTIVO */}
           <div className="pattern-viewer">
             <h3>Vista Previa (Click en una fila para marcar progreso)</h3>
+            
+                        {/* Zoom indicator */}
+                        <div className="zoom-indicator" data-testid="zoom-indicator">
+                          {zoom.zoomLevel}%
+                        </div>
+            
             <div 
+                            ref={patternGridRef}
+                            data-testid="pattern-grid"
               className="grid-container"
               style={{
-                gridTemplateColumns: `repeat(${pattern.dimensions.width}, 1fr)`
+                gridTemplateColumns: `repeat(${pattern.dimensions.width}, 1fr)`,
+                transform: `scale(${zoom.zoomLevel / 100})`,
+                transformOrigin: 'top left',
+                transition: 'transform 0.2s ease'
               }}
             >
               {pattern.grid.map((row, rowIndex) => (
