@@ -132,10 +132,28 @@ function App() {
           <div className="pattern-viewer">
             <h3>Vista Previa (Click en una fila para marcar progreso)</h3>
             
-                        {/* Zoom indicator */}
-                        <div className="zoom-indicator" data-testid="zoom-indicator">
-                          {zoom.zoomLevel}%
-                        </div>
+            {/* Zoom controls */}
+            <div className="zoom-controls">
+              <button 
+                onClick={zoom.zoomOut}
+                disabled={!zoom.canZoomOut}
+                aria-label="Zoom out"
+                title="Zoom out"
+              >
+                −
+              </button>
+              <div className="zoom-indicator" data-testid="zoom-indicator">
+                {zoom.zoomLevel}%
+              </div>
+              <button 
+                onClick={zoom.zoomIn}
+                disabled={!zoom.canZoomIn}
+                aria-label="Zoom in"
+                title="Zoom in"
+              >
+                +
+              </button>
+            </div>
             
             <div 
                             ref={patternGridRef}
