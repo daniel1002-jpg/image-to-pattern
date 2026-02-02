@@ -2,8 +2,9 @@ import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { render, screen, waitFor } from '@testing-library/react';
 import { act } from 'react';
 import userEvent from '@testing-library/user-event';
-import App from '../../src/App';
-import { mockPatternData } from '../helpers/mockData';
+import App from '../../../src/App';
+import { mockPatternData } from '../../helpers/mockData';
+import { setupInitialPattern } from '../../helpers/testSetup';
 
 describe('Scenario 2: Zoom in/out buttons', () => {
   beforeEach(() => {
@@ -17,18 +18,7 @@ describe('Scenario 2: Zoom in/out buttons', () => {
 
   it('should increase zoom when clicking zoom in button', async () => {
     const user = userEvent.setup();
-    render(<App />);
-
-    const file = new File(['dummy'], 'test.png', { type: 'image/png' });
-    const input = screen.getByTitle('file');
-    await user.upload(input, file);
-
-    const generateButton = screen.getByRole('button', { name: /generar patrón/i });
-    await user.click(generateButton);
-
-    await waitFor(() => {
-      expect(screen.queryByText(/generando/i)).not.toBeInTheDocument();
-    });
+    await setupInitialPattern(user);
 
     const zoomInButton = screen.getByRole('button', { name: /zoom in|\+/i });
 
@@ -44,18 +34,7 @@ describe('Scenario 2: Zoom in/out buttons', () => {
 
   it('should decrease zoom when clicking zoom out button', async () => {
     const user = userEvent.setup();
-    render(<App />);
-
-    const file = new File(['dummy'], 'test.png', { type: 'image/png' });
-    const input = screen.getByTitle('file');
-    await user.upload(input, file);
-
-    const generateButton = screen.getByRole('button', { name: /generar patrón/i });
-    await user.click(generateButton);
-
-    await waitFor(() => {
-      expect(screen.queryByText(/generando/i)).not.toBeInTheDocument();
-    });
+    await setupInitialPattern(user);
 
     const zoomOutButton = screen.getByRole('button', { name: /zoom out|-/i });
 
@@ -71,18 +50,7 @@ describe('Scenario 2: Zoom in/out buttons', () => {
 
   it('should disable zoom in button at max zoom (200%)', async () => {
     const user = userEvent.setup();
-    render(<App />);
-
-    const file = new File(['dummy'], 'test.png', { type: 'image/png' });
-    const input = screen.getByTitle('file');
-    await user.upload(input, file);
-
-    const generateButton = screen.getByRole('button', { name: /generar patrón/i });
-    await user.click(generateButton);
-
-    await waitFor(() => {
-      expect(screen.queryByText(/generando/i)).not.toBeInTheDocument();
-    });
+    await setupInitialPattern(user);
 
     const zoomInButton = screen.getByRole('button', { name: /zoom in|\+/i });
 
@@ -103,18 +71,7 @@ describe('Scenario 2: Zoom in/out buttons', () => {
 
   it('should disable zoom out button at min zoom (50%)', async () => {
     const user = userEvent.setup();
-    render(<App />);
-
-    const file = new File(['dummy'], 'test.png', { type: 'image/png' });
-    const input = screen.getByTitle('file');
-    await user.upload(input, file);
-
-    const generateButton = screen.getByRole('button', { name: /generar patrón/i });
-    await user.click(generateButton);
-
-    await waitFor(() => {
-      expect(screen.queryByText(/generando/i)).not.toBeInTheDocument();
-    });
+    await setupInitialPattern(user);
 
     const zoomOutButton = screen.getByRole('button', { name: /zoom out|-/i });
 
@@ -135,18 +92,7 @@ describe('Scenario 2: Zoom in/out buttons', () => {
 
   it('should enable buttons when moving away from limits', async () => {
     const user = userEvent.setup();
-    render(<App />);
-
-    const file = new File(['dummy'], 'test.png', { type: 'image/png' });
-    const input = screen.getByTitle('file');
-    await user.upload(input, file);
-
-    const generateButton = screen.getByRole('button', { name: /generar patrón/i });
-    await user.click(generateButton);
-
-    await waitFor(() => {
-      expect(screen.queryByText(/generando/i)).not.toBeInTheDocument();
-    });
+    await setupInitialPattern(user);
 
     const zoomInButton = screen.getByRole('button', { name: /zoom in|\+/i });
     const zoomOutButton = screen.getByRole('button', { name: /zoom out|-/i });

@@ -1,8 +1,9 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { render, screen, waitFor, fireEvent } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import App from '../../src/App';
-import { mockPatternData } from '../helpers/mockData';
+import App from '../../../src/App';
+import { mockPatternData } from '../../helpers/mockData';
+import { setupInitialPattern } from '../../helpers/testSetup';
 
 describe('Scenario 5: Reset zoom to 100%', () => {
   beforeEach(() => {
@@ -16,18 +17,7 @@ describe('Scenario 5: Reset zoom to 100%', () => {
 
   it('should have a reset button when zoom is not 100%', async () => {
     const user = userEvent.setup();
-    render(<App />);
-
-    const file = new File(['dummy'], 'test.png', { type: 'image/png' });
-    const input = screen.getByTitle('file');
-    await user.upload(input, file);
-
-    const generateButton = screen.getByRole('button', { name: /generar patrón/i });
-    await user.click(generateButton);
-
-    await waitFor(() => {
-      expect(screen.queryByText(/generando|tejiendo/i)).not.toBeInTheDocument();
-    });
+    await setupInitialPattern(user);
 
     // At 100% zoom, reset button should not be visible or be disabled
     let resetButton = screen.queryByRole('button', { name: /reset.*zoom|zoom.*reset/i });
@@ -46,18 +36,7 @@ describe('Scenario 5: Reset zoom to 100%', () => {
 
   it('should reset zoom to 100% when clicking reset button', async () => {
     const user = userEvent.setup();
-    render(<App />);
-
-    const file = new File(['dummy'], 'test.png', { type: 'image/png' });
-    const input = screen.getByTitle('file');
-    await user.upload(input, file);
-
-    const generateButton = screen.getByRole('button', { name: /generar patrón/i });
-    await user.click(generateButton);
-
-    await waitFor(() => {
-      expect(screen.queryByText(/generando|tejiendo/i)).not.toBeInTheDocument();
-    });
+    await setupInitialPattern(user);
 
     // Zoom in to 150%
     const zoomInButton = screen.getByRole('button', { name: /zoom in|\+/i });
@@ -81,18 +60,7 @@ describe('Scenario 5: Reset zoom to 100%', () => {
 
   it('should reset zoom on double-click of pattern grid', async () => {
     const user = userEvent.setup();
-    render(<App />);
-
-    const file = new File(['dummy'], 'test.png', { type: 'image/png' });
-    const input = screen.getByTitle('file');
-    await user.upload(input, file);
-
-    const generateButton = screen.getByRole('button', { name: /generar patrón/i });
-    await user.click(generateButton);
-
-    await waitFor(() => {
-      expect(screen.queryByText(/generando|tejiendo/i)).not.toBeInTheDocument();
-    });
+    await setupInitialPattern(user);
 
     // Zoom in to 140%
     const zoomInButton = screen.getByRole('button', { name: /zoom in|\+/i });
@@ -116,18 +84,7 @@ describe('Scenario 5: Reset zoom to 100%', () => {
 
   it('should also reset pan when resetting zoom', async () => {
     const user = userEvent.setup();
-    render(<App />);
-
-    const file = new File(['dummy'], 'test.png', { type: 'image/png' });
-    const input = screen.getByTitle('file');
-    await user.upload(input, file);
-
-    const generateButton = screen.getByRole('button', { name: /generar patrón/i });
-    await user.click(generateButton);
-
-    await waitFor(() => {
-      expect(screen.queryByText(/generando|tejiendo/i)).not.toBeInTheDocument();
-    });
+    await setupInitialPattern(user);
 
     // Zoom in
     const zoomInButton = screen.getByRole('button', { name: /zoom in|\+/i });

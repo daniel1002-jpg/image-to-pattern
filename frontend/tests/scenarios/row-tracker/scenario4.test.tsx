@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
-import App from '../../src/App';
-import { mockPatternData, createMockFile } from '../helpers/mockData';
+import App from '../../../src/App';
+import { mockPatternData, createMockFile } from '../../helpers/mockData';
 
 /**
  * SCENARIO 4: Reset tracker

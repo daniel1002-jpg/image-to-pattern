@@ -2,8 +2,9 @@ import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { render, screen, waitFor } from '@testing-library/react';
 import { act } from 'react';
 import userEvent from '@testing-library/user-event';
-import App from '../../src/App';
-import { mockPatternData } from '../helpers/mockData';
+import App from '../../../src/App';
+import { mockPatternData } from '../../helpers/mockData';
+import { setupInitialPattern } from '../../helpers/testSetup';
 
 describe('Scenario 3: Zoom level indicator', () => {
   beforeEach(() => {
@@ -17,18 +18,7 @@ describe('Scenario 3: Zoom level indicator', () => {
 
   it('should display initial zoom level of 100%', async () => {
     const user = userEvent.setup();
-    render(<App />);
-
-    const file = new File(['dummy'], 'test.png', { type: 'image/png' });
-    const input = screen.getByTitle('file');
-    await user.upload(input, file);
-
-    const generateButton = screen.getByRole('button', { name: /generar patrón/i });
-    await user.click(generateButton);
-
-    await waitFor(() => {
-      expect(screen.queryByText(/generando|tejiendo/i)).not.toBeInTheDocument();
-    });
+    await setupInitialPattern(user);
 
     const zoomIndicator = screen.getByTestId('zoom-indicator');
     expect(zoomIndicator).toHaveTextContent('100%');
@@ -36,18 +26,7 @@ describe('Scenario 3: Zoom level indicator', () => {
 
   it('should update indicator in real-time when using scroll', async () => {
     const user = userEvent.setup();
-    render(<App />);
-
-    const file = new File(['dummy'], 'test.png', { type: 'image/png' });
-    const input = screen.getByTitle('file');
-    await user.upload(input, file);
-
-    const generateButton = screen.getByRole('button', { name: /generar patrón/i });
-    await user.click(generateButton);
-
-    await waitFor(() => {
-      expect(screen.queryByText(/generando|tejiendo/i)).not.toBeInTheDocument();
-    });
+    await setupInitialPattern(user);
 
     const patternGrid = screen.getByTestId('pattern-grid');
     const zoomIndicator = screen.getByTestId('zoom-indicator');
@@ -88,18 +67,7 @@ describe('Scenario 3: Zoom level indicator', () => {
 
   it('should update indicator in real-time when using buttons', async () => {
     const user = userEvent.setup();
-    render(<App />);
-
-    const file = new File(['dummy'], 'test.png', { type: 'image/png' });
-    const input = screen.getByTitle('file');
-    await user.upload(input, file);
-
-    const generateButton = screen.getByRole('button', { name: /generar patrón/i });
-    await user.click(generateButton);
-
-    await waitFor(() => {
-      expect(screen.queryByText(/generando|tejiendo/i)).not.toBeInTheDocument();
-    });
+    await setupInitialPattern(user);
 
     const zoomInButton = screen.getByRole('button', { name: /zoom in|\+/i });
     const zoomOutButton = screen.getByRole('button', { name: /zoom out|-/i });
@@ -138,18 +106,7 @@ describe('Scenario 3: Zoom level indicator', () => {
 
   it('should display exact zoom percentage at various levels', async () => {
     const user = userEvent.setup();
-    render(<App />);
-
-    const file = new File(['dummy'], 'test.png', { type: 'image/png' });
-    const input = screen.getByTitle('file');
-    await user.upload(input, file);
-
-    const generateButton = screen.getByRole('button', { name: /generar patrón/i });
-    await user.click(generateButton);
-
-    await waitFor(() => {
-      expect(screen.queryByText(/generando|tejiendo/i)).not.toBeInTheDocument();
-    });
+    await setupInitialPattern(user);
 
     const zoomInButton = screen.getByRole('button', { name: /zoom in|\+/i });
     const zoomIndicator = screen.getByTestId('zoom-indicator');
@@ -171,18 +128,7 @@ describe('Scenario 3: Zoom level indicator', () => {
 
   it('should show indicator updates are smooth (CSS transition)', async () => {
     const user = userEvent.setup();
-    render(<App />);
-
-    const file = new File(['dummy'], 'test.png', { type: 'image/png' });
-    const input = screen.getByTitle('file');
-    await user.upload(input, file);
-
-    const generateButton = screen.getByRole('button', { name: /generar patrón/i });
-    await user.click(generateButton);
-
-    await waitFor(() => {
-      expect(screen.queryByText(/generando|tejiendo/i)).not.toBeInTheDocument();
-    });
+    await setupInitialPattern(user);
 
     const patternGrid = screen.getByTestId('pattern-grid');
 

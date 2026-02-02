@@ -1,8 +1,8 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { render, screen, waitFor, fireEvent } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import App from '../../src/App';
-import { mockPatternData } from '../helpers/mockData';
+import App from '../../../src/App';
+import { mockPatternData } from '../../helpers/mockData';
 
 describe('Scenario 6: Auto-reset zoom on new pattern', () => {
   beforeEach(() => {

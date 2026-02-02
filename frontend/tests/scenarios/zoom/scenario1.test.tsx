@@ -2,8 +2,9 @@ import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { render, screen, waitFor } from '@testing-library/react';
 import { act } from 'react';
 import userEvent from '@testing-library/user-event';
-import App from '../../src/App';
-import { mockPatternData } from '../helpers/mockData';
+import App from '../../../src/App';
+import { mockPatternData } from '../../helpers/mockData';
+import { setupInitialPattern } from '../../helpers/testSetup';
 
 describe('Scenario 1: Zoom with mouse scroll (Ctrl+Scroll)', () => {
   beforeEach(() => {
@@ -17,18 +18,7 @@ describe('Scenario 1: Zoom with mouse scroll (Ctrl+Scroll)', () => {
 
   it('should increase zoom when scrolling up with Ctrl pressed', async () => {
     const user = userEvent.setup();
-    render(<App />);
-
-    const file = new File(['dummy'], 'test.png', { type: 'image/png' });
-    const input = screen.getByTitle('file');
-    await user.upload(input, file);
-
-    const generateButton = screen.getByRole('button', { name: /generar patrón/i });
-    await user.click(generateButton);
-
-    await waitFor(() => {
-      expect(screen.queryByText(/generando/i)).not.toBeInTheDocument();
-    });
+    await setupInitialPattern(user);
 
     const patternGrid = screen.getByTestId('pattern-grid');
 
@@ -50,18 +40,7 @@ describe('Scenario 1: Zoom with mouse scroll (Ctrl+Scroll)', () => {
 
   it('should decrease zoom when scrolling down with Ctrl pressed', async () => {
     const user = userEvent.setup();
-    render(<App />);
-
-    const file = new File(['dummy'], 'test.png', { type: 'image/png' });
-    const input = screen.getByTitle('file');
-    await user.upload(input, file);
-
-    const generateButton = screen.getByRole('button', { name: /generar patrón/i });
-    await user.click(generateButton);
-
-    await waitFor(() => {
-      expect(screen.queryByText(/generando/i)).not.toBeInTheDocument();
-    });
+    await setupInitialPattern(user);
 
     const patternGrid = screen.getByTestId('pattern-grid');
 
@@ -83,18 +62,7 @@ describe('Scenario 1: Zoom with mouse scroll (Ctrl+Scroll)', () => {
 
   it('should respect zoom limits (50% min, 200% max)', async () => {
     const user = userEvent.setup();
-    render(<App />);
-
-    const file = new File(['dummy'], 'test.png', { type: 'image/png' });
-    const input = screen.getByTitle('file');
-    await user.upload(input, file);
-
-    const generateButton = screen.getByRole('button', { name: /generar patrón/i });
-    await user.click(generateButton);
-
-    await waitFor(() => {
-      expect(screen.queryByText(/generando/i)).not.toBeInTheDocument();
-    });
+    await setupInitialPattern(user);
 
     const patternGrid = screen.getByTestId('pattern-grid');
     const zoomIndicator = screen.getByTestId('zoom-indicator');
@@ -134,18 +102,7 @@ describe('Scenario 1: Zoom with mouse scroll (Ctrl+Scroll)', () => {
 
   it('should not zoom when Ctrl is not pressed', async () => {
     const user = userEvent.setup();
-    render(<App />);
-
-    const file = new File(['dummy'], 'test.png', { type: 'image/png' });
-    const input = screen.getByTitle('file');
-    await user.upload(input, file);
-
-    const generateButton = screen.getByRole('button', { name: /generar patrón/i });
-    await user.click(generateButton);
-
-    await waitFor(() => {
-      expect(screen.queryByText(/generando/i)).not.toBeInTheDocument();
-    });
+    await setupInitialPattern(user);
 
     const patternGrid = screen.getByTestId('pattern-grid');
 
