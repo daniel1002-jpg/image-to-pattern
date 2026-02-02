@@ -7,9 +7,7 @@ Cuando genere mensajes de commit, SIEMPRE debo seguir el estándar "Conventional
 NO uses listas con viñetas ni títulos largos. Usa este formato estricto:
 
 ```
-<tipo>: <descripción breve en imperativo>
-
-<palabraClave> #<número-del-issue>
+<tipo>: <descripción breve en imperativo> (<palabraClave> #<número-del-issue>)
 ```
 
 Los tipos permitidos son:
