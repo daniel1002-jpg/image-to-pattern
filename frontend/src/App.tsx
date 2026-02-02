@@ -1,5 +1,7 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { useRowTracker } from './hooks/useRowTracker';
+import { usePatternZoom } from './hooks/usePatternZoom';
+import { usePatternPan } from './hooks/usePatternPan';
 import './App.css';
 
 interface PatternData {
@@ -27,10 +29,18 @@ function App() {
   // Custom hook para gestionar el tracker de filas completadas
   const rowTracker = useRowTracker(pattern?.grid.length || 0);
 
+  // Ref for pattern grid and zoom hook
+  const patternGridRef = useRef<HTMLDivElement>(null!);
+  const patternContainerRef = useRef<HTMLDivElement>(null!);
+  const zoom = usePatternZoom(patternGridRef, Boolean(pattern));
+  const pan = usePatternPan(patternContainerRef, zoom.zoomLevel);
+
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
       setSelectedFile(e.target.files[0]);
       setPattern(null); // Limpiar resultado anterior
+      zoom.resetZoom();
+      pan.resetPan();
     }
   };
 
@@ -41,6 +51,8 @@ function App() {
     setPattern(null);
     setActiveRow(null);
     rowTracker.clearProgress(); // Limpiar filas completadas
+    zoom.resetZoom();
+    pan.resetPan();
 
     const formData = new FormData();
     formData.append('file', selectedFile);
@@ -126,12 +138,60 @@ function App() {
           {/* PATRÓN INTERACTIVO */}
           <div className="pattern-viewer">
             <h3>Vista Previa (Click en una fila para marcar progreso)</h3>
+            
+            {/* Zoom controls */}
+            <div className="zoom-controls">
+              <button 
+                onClick={zoom.zoomOut}
+                disabled={!zoom.canZoomOut}
+                aria-label="Zoom out"
+                title="Zoom out"
+              >
+                −
+              </button>
+              <div className="zoom-indicator" data-testid="zoom-indicator">
+                {zoom.zoomLevel}%
+              </div>
+              <button 
+                onClick={zoom.zoomIn}
+                disabled={!zoom.canZoomIn}
+                aria-label="Zoom in"
+                title="Zoom in"
+              >
+                +
+              </button>
+              <button
+                onClick={zoom.resetZoom}
+                disabled={zoom.zoomLevel === 100}
+                aria-label="Reset Zoom"
+                title="Reset Zoom"
+              >
+                Reset
+              </button>
+            </div>
+            
             <div 
-              className="grid-container"
+              ref={patternContainerRef}
+              data-testid="pattern-container"
+              className="pattern-container"
               style={{
-                gridTemplateColumns: `repeat(${pattern.dimensions.width}, 1fr)`
+                transform: `translate(${pan.panX}px, ${pan.panY}px)`,
+                cursor: pan.canPan ? 'grab' : 'default',
+                transition: pan.isDragging ? 'none' : 'transform 0.1s ease'
               }}
             >
+              <div 
+                ref={patternGridRef}
+                data-testid="pattern-grid"
+                className="grid-container"
+                onDoubleClick={zoom.resetZoom}
+                style={{
+                  gridTemplateColumns: `repeat(${pattern.dimensions.width}, 1fr)`,
+                  transform: `scale(${zoom.zoomLevel / 100})`,
+                  transformOrigin: 'top left',
+                  transition: 'transform 0.2s ease'
+                }}
+              >
               {pattern.grid.map((row, rowIndex) => (
                 // Renderizamos fila por fila para poder manejar el tracker
                 row.map((colorIndex, colIndex) => {
@@ -152,6 +212,7 @@ function App() {
                    )
                 })
               ))}
+              </div>
             </div>
             
             {/* ESCENARIO 3: Contador de progreso */}

@@ -2,6 +2,38 @@
 
 Eres un experto desarrollador Senior.
 
+## Flujo de Trabajo TDD (IMPORTANTE)
+
+**Para cada feature/scenario nuevo:**
+
+1. **RED Phase**: 
+   - Crear archivo de tests completo con todos los test cases
+   - NO escribir código de implementación aún
+   - Ejecutar tests y dejar que fallen (esperado)
+   - Esperar revisión del usuario
+
+2. **Validación**:
+   - Usuario revisa los tests
+   - Usuario ejecuta los tests para confirmar que fallan
+   - Usuario consulta cualquier duda sobre la lógica de los tests
+   - Usuario da visto bueno explícitamente
+
+3. **GREEN Phase**:
+   - Solo después del visto bueno, escribir código MÍNIMO para pasar tests
+   - Evitar sobre-ingeniería o features extras
+   - Ejecutar tests hasta que pasen
+   - Hacer commit
+
+4. **REFACTOR Phase** (si aplica):
+   - Mejoras de código sin cambiar comportamiento
+   - Tests deben seguir pasando
+
+**Beneficios:**
+- Evita código corrupto o repetido
+- Mayor control y visibilidad
+- Validación de requisitos antes de implementar
+- Commits más limpios y específicos
+
 ## Estilo de Commits (IMPORTANTE)
 Cuando genere mensajes de commit, SIEMPRE debo seguir el estándar "Conventional Commits".
 NO uses listas con viñetas ni títulos largos. Usa este formato estricto:
@@ -50,3 +82,33 @@ NO hagas esto:
 - Usar palabras clave en minúsculas o mal escritas
 
 ***Escribe los commits en inglés***
+
+## Creación de Pull Requests (IMPORTANTE)
+
+**Estructura del PR:**
+- Título descriptivo siguiendo Conventional Commits
+- Cuerpo con overview y features implementadas
+- Testing summary (# tests, estado)
+- Code quality notes (refactoring, mejoras)
+- **NO incluir lista de commits** (GitHub los muestra automáticamente)
+- Incluir "closes #N" una sola vez al final
+
+**Ejemplo de cuerpo de PR:**
+```
+## 🎯 Overview
+Brief description of what was implemented.
+
+## ✨ Features Implemented
+- Feature 1
+- Feature 2
+
+## 🧪 Testing
+- X tests passing
+- No regressions
+
+## 🔗 Closes
+Closes #N
+```
+
+**Nota sobre Squash and Merge:**
+Cuando uses "squash and merge", solo necesitas **un "closes #N"** en el mensaje final del squash. Los "closes" individuales en cada commit del PR son redundantes.
