@@ -1,6 +1,7 @@
 import { useState, useRef } from 'react';
 import { useRowTracker } from './hooks/useRowTracker';
 import { usePatternZoom } from './hooks/usePatternZoom';
+import { usePatternPan } from './hooks/usePatternPan';
 import './App.css';
 
 interface PatternData {
@@ -30,7 +31,9 @@ function App() {
 
   // Ref for pattern grid and zoom hook
   const patternGridRef = useRef<HTMLDivElement>(null!);
+  const patternContainerRef = useRef<HTMLDivElement>(null!);
   const zoom = usePatternZoom(patternGridRef, Boolean(pattern));
+  const pan = usePatternPan(patternContainerRef, zoom.zoomLevel);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
@@ -156,16 +159,26 @@ function App() {
             </div>
             
             <div 
-                            ref={patternGridRef}
-                            data-testid="pattern-grid"
-              className="grid-container"
+              ref={patternContainerRef}
+              data-testid="pattern-container"
+              className="pattern-container"
               style={{
-                gridTemplateColumns: `repeat(${pattern.dimensions.width}, 1fr)`,
-                transform: `scale(${zoom.zoomLevel / 100})`,
-                transformOrigin: 'top left',
-                transition: 'transform 0.2s ease'
+                transform: `translate(${pan.panX}px, ${pan.panY}px)`,
+                cursor: pan.canPan ? 'grab' : 'default',
+                transition: pan.isDragging ? 'none' : 'transform 0.1s ease'
               }}
             >
+              <div 
+                ref={patternGridRef}
+                data-testid="pattern-grid"
+                className="grid-container"
+                style={{
+                  gridTemplateColumns: `repeat(${pattern.dimensions.width}, 1fr)`,
+                  transform: `scale(${zoom.zoomLevel / 100})`,
+                  transformOrigin: 'top left',
+                  transition: 'transform 0.2s ease'
+                }}
+              >
               {pattern.grid.map((row, rowIndex) => (
                 // Renderizamos fila por fila para poder manejar el tracker
                 row.map((colorIndex, colIndex) => {
@@ -186,6 +199,7 @@ function App() {
                    )
                 })
               ))}
+              </div>
             </div>
             
             {/* ESCENARIO 3: Contador de progreso */}
