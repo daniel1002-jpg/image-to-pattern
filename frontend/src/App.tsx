@@ -156,6 +156,14 @@ function App() {
               >
                 +
               </button>
+              <button
+                onClick={zoom.resetZoom}
+                disabled={zoom.zoomLevel === 100}
+                aria-label="Reset Zoom"
+                title="Reset Zoom"
+              >
+                Reset
+              </button>
             </div>
             
             <div 
@@ -172,6 +180,7 @@ function App() {
                 ref={patternGridRef}
                 data-testid="pattern-grid"
                 className="grid-container"
+                onDoubleClick={zoom.resetZoom}
                 style={{
                   gridTemplateColumns: `repeat(${pattern.dimensions.width}, 1fr)`,
                   transform: `scale(${zoom.zoomLevel / 100})`,
