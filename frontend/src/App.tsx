@@ -2,7 +2,8 @@ import { useState, useRef } from 'react';
 import { useRowTracker } from './hooks/useRowTracker';
 import { usePatternZoom } from './hooks/usePatternZoom';
 import { usePatternPan } from './hooks/usePatternPan';
-import { getExportTimestamp, downloadBlob } from './utils/exportHelpers';
+import { getExportTimestamp, downloadBlob, generatePdfBlob } from './utils/exportHelpers';
+import { PdfExportModal, PdfExportOptions } from './components/PdfExportModal';
 import './App.css';
 
 interface PatternData {
@@ -19,12 +20,13 @@ function App() {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [pattern, setPattern] = useState<PatternData | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [showPdfModal, setShowPdfModal] = useState(false);
   
   // Configuración del patrón
   const [width, setWidth] = useState(50);
   const [nColors, setNColors] = useState(5);
   
-  // Tracker de la fila activa (antigua funcionalidad)
+  // Tracker de la fila activa
   const [activeRow, setActiveRow] = useState<number | null>(null);
   
   // Custom hook para gestionar el tracker de filas completadas
@@ -85,6 +87,28 @@ function App() {
     const filename = `pattern-${getExportTimestamp()}.png`;
     
     downloadBlob(blob, filename);
+  };
+
+  const handleExportPdfClick = () => {
+    setShowPdfModal(true);
+  };
+
+  const handlePdfExportConfirm = async (options: PdfExportOptions) => {
+    if (!pattern) return;
+
+    try {
+      const blob = await generatePdfBlob(pattern, options);
+      const filename = `pattern-${getExportTimestamp()}.pdf`;
+      downloadBlob(blob, filename);
+      setShowPdfModal(false);
+    } catch (error) {
+      console.error('Error exporting PDF:', error);
+      alert('Error exporting PDF');
+    }
+  };
+
+  const handlePdfExportCancel = () => {
+    setShowPdfModal(false);
   };
 
   return (
@@ -156,6 +180,13 @@ function App() {
                 title="Export PNG"
               >
                 Export PNG
+              </button>
+              <button
+                onClick={handleExportPdfClick}
+                aria-label="Export PDF"
+                title="Export PDF"
+              >
+                Export PDF
               </button>
             </div>
             
@@ -256,6 +287,10 @@ function App() {
             )}
           </div>
         </div>
+      )}
+      
+      {showPdfModal && (
+        <PdfExportModal onConfirm={handlePdfExportConfirm} onCancel={handlePdfExportCancel} />
       )}
     </div>
   );

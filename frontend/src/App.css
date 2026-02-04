@@ -80,3 +80,120 @@
   text-align: center; background: #333; color: white;
   padding: 10px; margin-top: 10px; border-radius: 8px;
 }
+
+/* EXPORT CONTROLS */
+.export-controls {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+}
+
+.export-controls button {
+  background: #2196F3;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.95rem;
+  transition: background 0.2s;
+}
+
+.export-controls button:hover {
+  background: #1976D2;
+}
+
+/* PDF EXPORT MODAL */
+.pdf-export-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.pdf-export-modal {
+  background: white;
+  padding: 30px;
+  border-radius: 12px;
+  min-width: 400px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+}
+
+.pdf-export-modal h2 {
+  margin: 0 0 20px 0;
+  color: #333;
+  font-size: 1.5rem;
+}
+
+.pdf-options-group {
+  margin-bottom: 20px;
+}
+
+.pdf-options-group label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: 500;
+  color: #333;
+}
+
+.radio-group {
+  display: flex;
+  gap: 20px;
+  margin-top: 8px;
+}
+
+.radio-group label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+  font-weight: normal;
+  cursor: pointer;
+}
+
+.pdf-export-modal input[type="checkbox"],
+.pdf-export-modal input[type="radio"] {
+  cursor: pointer;
+}
+
+.pdf-modal-actions {
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+  margin-top: 25px;
+}
+
+.pdf-modal-actions button {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.95rem;
+  transition: background 0.2s;
+}
+
+.pdf-modal-actions button:first-child {
+  background: #ddd;
+  color: #333;
+}
+
+.pdf-modal-actions button:first-child:hover {
+  background: #bbb;
+}
+
+.pdf-export-btn {
+  background: #4CAF50 !important;
+  color: white !important;
+}
+
+.pdf-export-btn:hover {
+  background: #45a049 !important;
+}
