@@ -2,6 +2,7 @@ import { useState, useRef } from 'react';
 import { useRowTracker } from './hooks/useRowTracker';
 import { usePatternZoom } from './hooks/usePatternZoom';
 import { usePatternPan } from './hooks/usePatternPan';
+import { getExportTimestamp, downloadBlob } from './utils/exportHelpers';
 import './App.css';
 
 interface PatternData {
@@ -77,6 +78,15 @@ function App() {
     }
   };
 
+  const handleExportPng = () => {
+    if (!pattern) return;
+
+    const blob = new Blob([JSON.stringify(pattern)], { type: 'image/png' });
+    const filename = `pattern-${getExportTimestamp()}.png`;
+    
+    downloadBlob(blob, filename);
+  };
+
   return (
     <div className="container">
       <h1>🧶 Image-to-Pattern MVP</h1>
@@ -138,6 +148,16 @@ function App() {
           {/* PATRÓN INTERACTIVO */}
           <div className="pattern-viewer">
             <h3>Vista Previa (Click en una fila para marcar progreso)</h3>
+
+            <div className="export-controls">
+              <button
+                onClick={handleExportPng}
+                aria-label="Export PNG"
+                title="Export PNG"
+              >
+                Export PNG
+              </button>
+            </div>
             
             {/* Zoom controls */}
             <div className="zoom-controls">
@@ -184,6 +204,8 @@ function App() {
                 ref={patternGridRef}
                 data-testid="pattern-grid"
                 className="grid-container"
+                role="img"
+                aria-label="Pattern preview"
                 onDoubleClick={zoom.resetZoom}
                 style={{
                   gridTemplateColumns: `repeat(${pattern.dimensions.width}, 1fr)`,
