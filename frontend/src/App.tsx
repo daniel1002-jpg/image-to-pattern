@@ -3,7 +3,8 @@ import { useRowTracker } from './hooks/useRowTracker';
 import { usePatternZoom } from './hooks/usePatternZoom';
 import { usePatternPan } from './hooks/usePatternPan';
 import { getExportTimestamp, downloadBlob, generatePdfBlob } from './utils/exportHelpers';
-import { PdfExportModal, PdfExportOptions } from './components/PdfExportModal';
+import { PdfExportModal } from './components/PdfExportModal';
+import type { PdfExportOptions } from './components/PdfExportModal';
 import './App.css';
 
 interface PatternData {

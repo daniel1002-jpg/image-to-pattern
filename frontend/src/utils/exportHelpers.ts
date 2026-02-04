@@ -46,6 +46,7 @@ export const generatePdfBlob = async (
 ): Promise<Blob> => {
   // Simple implementation: create a minimal PDF
   // For production, would use jsPDF with proper formatting
+  const legendLine = options.includeLegend ? ` - Legend: ${options.includeLegend}` : '';
   const pdfContent = `%PDF-1.4
 1 0 obj
 << /Type /Catalog /Pages 2 0 R >>
@@ -65,7 +66,7 @@ stream
 BT
 /F1 12 Tf
 100 700 Td
-(Pattern Export - ${options.pageSize} - Legend: ${options.includeLegend}) Tj
+(Pattern Export - ${options.pageSize}${legendLine}) Tj
 ET
 endstream
 endobj
