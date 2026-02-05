@@ -32,6 +32,8 @@ export const downloadBlob = (blob: Blob, filename: string): void => {
   URL.revokeObjectURL(url);
 };
 
+export const WATERMARK_TEXT = 'Image-to-Pattern';
+
 /**
  * Generates a PDF blob from pattern data
  * Minimal implementation for testing - creates a simple PDF
@@ -47,6 +49,7 @@ export const generatePdfBlob = async (
   // Simple implementation: create a minimal PDF
   // For production, would use jsPDF with proper formatting
   const legendLine = options.includeLegend ? ` - Legend: ${options.includeLegend}` : '';
+  const watermarkLine = ` - Watermark: ${WATERMARK_TEXT}`;
   const pdfContent = `%PDF-1.4
 1 0 obj
 << /Type /Catalog /Pages 2 0 R >>
@@ -66,7 +69,7 @@ stream
 BT
 /F1 12 Tf
 100 700 Td
-(Pattern Export - ${options.pageSize}${legendLine}) Tj
+(Pattern Export - ${options.pageSize}${legendLine}${watermarkLine}) Tj
 ET
 endstream
 endobj

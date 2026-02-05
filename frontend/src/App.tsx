@@ -2,7 +2,7 @@ import { useState, useRef } from 'react';
 import { useRowTracker } from './hooks/useRowTracker';
 import { usePatternZoom } from './hooks/usePatternZoom';
 import { usePatternPan } from './hooks/usePatternPan';
-import { getExportTimestamp, downloadBlob, generatePdfBlob } from './utils/exportHelpers';
+import { getExportTimestamp, downloadBlob, generatePdfBlob, WATERMARK_TEXT } from './utils/exportHelpers';
 import { PdfExportModal } from './components/PdfExportModal';
 import type { PdfExportOptions } from './components/PdfExportModal';
 import './App.css';
@@ -84,7 +84,11 @@ function App() {
   const handleExportPng = () => {
     if (!pattern) return;
 
-    const blob = new Blob([JSON.stringify(pattern)], { type: 'image/png' });
+    const exportData = {
+      ...pattern,
+      watermark: WATERMARK_TEXT
+    };
+    const blob = new Blob([JSON.stringify(exportData)], { type: 'image/png' });
     const filename = `pattern-${getExportTimestamp()}.png`;
     
     downloadBlob(blob, filename);
