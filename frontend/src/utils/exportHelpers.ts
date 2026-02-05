@@ -1,3 +1,5 @@
+import { jsPDF } from 'jspdf';
+
 /**
  * Generates a timestamp in format: YYYY-MM-DD-HHmmss
  * Used for export filenames to ensure uniqueness and preserve generation time
@@ -148,10 +150,10 @@ const insertTextChunks = (png: Uint8Array, chunks: Uint8Array[]): Uint8Array => 
   return output;
 };
 
-export const generatePngBlob = async (
+const buildPatternRgba = (
   pattern: PatternData,
-  completedRows: Set<number> = new Set()
-): Promise<Blob> => {
+  completedRows: Set<number>
+): { rgba: Uint8Array; width: number; height: number } => {
   const pixelSize = DEFAULT_PIXEL_SIZE;
   const width = pattern.dimensions.width * pixelSize;
   const height = pattern.dimensions.height * pixelSize;
@@ -183,14 +185,39 @@ export const generatePngBlob = async (
     }
   }
 
-  const { default: UPNG } = await import('upng-js');
-  const pngArrayBuffer = UPNG.encode([rgba.buffer], width, height, 0);
-  const pngBytes = new Uint8Array(pngArrayBuffer);
+  return { rgba, width, height };
+};
 
-  const metadata = JSON.stringify({
-    ...pattern,
-    watermark: WATERMARK_TEXT,
-  });
+const bytesToBase64 = (bytes: Uint8Array): string => {
+  let binary = '';
+  for (let i = 0; i < bytes.length; i += 1) {
+    binary += String.fromCharCode(bytes[i]);
+  }
+  return btoa(binary);
+};
+
+const buildPatternPngBytes = async (
+  pattern: PatternData,
+  completedRows: Set<number>
+): Promise<Uint8Array> => {
+  const { rgba, width, height } = buildPatternRgba(pattern, completedRows);
+  const { default: UPNG } = await import('upng-js');
+  const pngArrayBuffer = UPNG.encode([rgba.buffer as ArrayBuffer], width, height, 0);
+  return new Uint8Array(pngArrayBuffer);
+};
+
+const buildExportMetadata = (pattern: PatternData) => ({
+  ...pattern,
+  watermark: WATERMARK_TEXT,
+});
+
+export const generatePngBlob = async (
+  pattern: PatternData,
+  completedRows: Set<number> = new Set()
+): Promise<Blob> => {
+  const pngBytes = await buildPatternPngBytes(pattern, completedRows);
+
+  const metadata = JSON.stringify(buildExportMetadata(pattern));
   const textChunks = [
     buildTextChunk('metadata', metadata),
     buildTextChunk('watermark', WATERMARK_TEXT),
@@ -200,63 +227,47 @@ export const generatePngBlob = async (
   const pngBuffer = withText.buffer.slice(
     withText.byteOffset,
     withText.byteOffset + withText.byteLength
-  );
-  return new Blob([pngBuffer], { type: 'image/png' });
+  ) as ArrayBuffer;
+  // Ensure we pass a Uint8Array to Blob to avoid SharedArrayBuffer issues
+  return new Blob([new Uint8Array(pngBuffer)], { type: 'image/png' });
 };
 
 /**
  * Generates a PDF blob from pattern data
- * Minimal implementation for testing - creates a simple PDF
+ * Embeds a PNG render of the pattern for visual export.
  * 
  * @param data - Pattern data to include
  * @param options - Export options (pageSize, includeLegend)
  * @returns Promise<Blob> containing the PDF
  */
 export const generatePdfBlob = async (
-  _data: PatternData,
-  options: { pageSize: string; includeLegend: boolean }
+  data: PatternData,
+  options: { pageSize: string; includeLegend: boolean },
+  completedRows: Set<number> = new Set()
 ): Promise<Blob> => {
-  // Simple implementation: create a minimal PDF
-  // For production, would use jsPDF with proper formatting
-  const legendLine = options.includeLegend ? ` - Legend: ${options.includeLegend}` : '';
-  const watermarkLine = ` - Watermark: ${WATERMARK_TEXT}`;
-  const pdfContent = `%PDF-1.4
-1 0 obj
-<< /Type /Catalog /Pages 2 0 R >>
-endobj
-2 0 obj
-<< /Type /Pages /Kids [3 0 R] /Count 1 >>
-endobj
-3 0 obj
-<< /Type /Page /Parent 2 0 R /Resources << /Font << /F1 4 0 R >> >> /MediaBox [0 0 612 792] /Contents 5 0 R >>
-endobj
-4 0 obj
-<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>
-endobj
-5 0 obj
-<< /Length 100 >>
-stream
-BT
-/F1 12 Tf
-100 700 Td
-(Pattern Export - ${options.pageSize}${legendLine}${watermarkLine}) Tj
-ET
-endstream
-endobj
-xref
-0 6
-0000000000 65535 f 
-0000000009 00000 n 
-0000000058 00000 n 
-0000000115 00000 n 
-0000000246 00000 n 
-0000000333 00000 n 
-trailer
-<< /Size 6 /Root 1 0 R >>
-startxref
-481
-%%EOF`;
+  const pdf = new jsPDF({
+    format: options.pageSize.toLowerCase() as 'a4' | 'letter' | 'a3',
+    unit: 'pt',
+  });
 
-  return new Blob([pdfContent], { type: 'application/pdf' });
+  const pngBytes = await buildPatternPngBytes(data, completedRows);
+  const base64 = bytesToBase64(pngBytes);
+  const dataUrl = `data:image/png;base64,${base64}`;
+
+  const pageWidth = pdf.internal.pageSize.getWidth();
+  const pageHeight = pdf.internal.pageSize.getHeight();
+  const padding = 40;
+  const imageWidth = pageWidth - padding * 2;
+  const imageHeight = imageWidth * (data.dimensions.height / data.dimensions.width);
+
+  pdf.addImage(dataUrl, 'PNG', padding, padding, imageWidth, imageHeight);
+
+  pdf.setFontSize(10);
+  const legendText = options.includeLegend ? 'Legend: true' : 'Legend: false';
+  pdf.text(`Pattern Export - ${options.pageSize} - ${legendText}`, padding, pageHeight - 40);
+  pdf.text(`Watermark: ${WATERMARK_TEXT}`, padding, pageHeight - 25);
+
+  const pdfArrayBuffer = pdf.output('arraybuffer');
+  return new Blob([pdfArrayBuffer], { type: 'application/pdf' });
 };
 

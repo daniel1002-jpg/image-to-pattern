@@ -89,7 +89,7 @@ function App() {
     if (!pattern) return;
 
     try {
-      const blob = await generatePdfBlob(pattern, options);
+      const blob = await generatePdfBlob(pattern, options, rowTracker.completedRows);
       const filename = `pattern-${getExportTimestamp()}.pdf`;
       downloadBlob(blob, filename);
       setShowPdfModal(false);
