@@ -34,6 +34,176 @@ export const downloadBlob = (blob: Blob, filename: string): void => {
 
 export const WATERMARK_TEXT = 'Image-to-Pattern';
 
+export interface PatternData {
+  status: string;
+  dimensions: {
+    width: number;
+    height: number;
+  };
+  palette: string[];
+  grid: number[][];
+}
+
+const DEFAULT_PIXEL_SIZE = 10;
+
+const hexToRgb = (hex: string): [number, number, number] => {
+  const normalized = hex.replace('#', '');
+  const value = normalized.length === 3
+    ? normalized.split('').map((c) => c + c).join('')
+    : normalized;
+  const num = parseInt(value, 16);
+  return [(num >> 16) & 255, (num >> 8) & 255, num & 255];
+};
+
+const applyCompletedRowStyle = (r: number, g: number, b: number): [number, number, number] => {
+  const gray = Math.round(r * 0.3 + g * 0.59 + b * 0.11);
+  const mixedR = Math.round((r + gray) / 2);
+  const mixedG = Math.round((g + gray) / 2);
+  const mixedB = Math.round((b + gray) / 2);
+
+  const finalR = Math.round((mixedR + 255) / 2);
+  const finalG = Math.round((mixedG + 255) / 2);
+  const finalB = Math.round((mixedB + 255) / 2);
+
+  return [finalR, finalG, finalB];
+};
+
+const createCrcTable = (): Uint32Array => {
+  const table = new Uint32Array(256);
+  for (let i = 0; i < 256; i += 1) {
+    let c = i;
+    for (let k = 0; k < 8; k += 1) {
+      c = c & 1 ? 0xedb88320 ^ (c >>> 1) : c >>> 1;
+    }
+    table[i] = c >>> 0;
+  }
+  return table;
+};
+
+const CRC_TABLE = createCrcTable();
+
+const crc32 = (bytes: Uint8Array): number => {
+  let crc = 0xffffffff;
+  for (let i = 0; i < bytes.length; i += 1) {
+    crc = CRC_TABLE[(crc ^ bytes[i]) & 0xff] ^ (crc >>> 8);
+  }
+  return (crc ^ 0xffffffff) >>> 0;
+};
+
+const buildTextChunk = (keyword: string, text: string): Uint8Array => {
+  const encoder = new TextEncoder();
+  const keywordBytes = encoder.encode(keyword);
+  const textBytes = encoder.encode(text);
+  const data = new Uint8Array(keywordBytes.length + 1 + textBytes.length);
+  data.set(keywordBytes, 0);
+  data[keywordBytes.length] = 0;
+  data.set(textBytes, keywordBytes.length + 1);
+
+  const length = data.length;
+  const chunk = new Uint8Array(12 + length);
+
+  chunk[0] = (length >>> 24) & 0xff;
+  chunk[1] = (length >>> 16) & 0xff;
+  chunk[2] = (length >>> 8) & 0xff;
+  chunk[3] = length & 0xff;
+
+  chunk.set([0x74, 0x45, 0x58, 0x74], 4); // tEXt
+  chunk.set(data, 8);
+
+  const crcInput = new Uint8Array(4 + data.length);
+  crcInput.set(chunk.slice(4, 8), 0);
+  crcInput.set(data, 4);
+  const crc = crc32(crcInput);
+  const crcOffset = 8 + data.length;
+  chunk[crcOffset] = (crc >>> 24) & 0xff;
+  chunk[crcOffset + 1] = (crc >>> 16) & 0xff;
+  chunk[crcOffset + 2] = (crc >>> 8) & 0xff;
+  chunk[crcOffset + 3] = crc & 0xff;
+
+  return chunk;
+};
+
+const insertTextChunks = (png: Uint8Array, chunks: Uint8Array[]): Uint8Array => {
+  const signatureLength = 8;
+  let offset = signatureLength;
+  const ihdrLength =
+    (png[offset] << 24) |
+    (png[offset + 1] << 16) |
+    (png[offset + 2] << 8) |
+    png[offset + 3];
+  const ihdrTotal = 12 + ihdrLength;
+  const insertOffset = signatureLength + ihdrTotal;
+
+  const chunksLength = chunks.reduce((sum, chunk) => sum + chunk.length, 0);
+  const output = new Uint8Array(png.length + chunksLength);
+
+  output.set(png.slice(0, insertOffset), 0);
+  let cursor = insertOffset;
+  for (const chunk of chunks) {
+    output.set(chunk, cursor);
+    cursor += chunk.length;
+  }
+  output.set(png.slice(insertOffset), cursor);
+
+  return output;
+};
+
+export const generatePngBlob = async (
+  pattern: PatternData,
+  completedRows: Set<number> = new Set()
+): Promise<Blob> => {
+  const pixelSize = DEFAULT_PIXEL_SIZE;
+  const width = pattern.dimensions.width * pixelSize;
+  const height = pattern.dimensions.height * pixelSize;
+  const rgba = new Uint8Array(width * height * 4);
+
+  rgba.fill(255);
+
+  for (let row = 0; row < pattern.grid.length; row += 1) {
+    const rowData = pattern.grid[row];
+    for (let col = 0; col < rowData.length; col += 1) {
+      const color = pattern.palette[rowData[col]];
+      let [r, g, b] = hexToRgb(color);
+      if (completedRows.has(row)) {
+        [r, g, b] = applyCompletedRowStyle(r, g, b);
+      }
+      const startX = col * pixelSize;
+      const startY = row * pixelSize;
+      for (let y = 0; y < pixelSize; y += 1) {
+        const pixelY = startY + y;
+        for (let x = 0; x < pixelSize; x += 1) {
+          const pixelX = startX + x;
+          const idx = (pixelY * width + pixelX) * 4;
+          rgba[idx] = r;
+          rgba[idx + 1] = g;
+          rgba[idx + 2] = b;
+          rgba[idx + 3] = 255;
+        }
+      }
+    }
+  }
+
+  const { default: UPNG } = await import('upng-js');
+  const pngArrayBuffer = UPNG.encode([rgba.buffer], width, height, 0);
+  const pngBytes = new Uint8Array(pngArrayBuffer);
+
+  const metadata = JSON.stringify({
+    ...pattern,
+    watermark: WATERMARK_TEXT,
+  });
+  const textChunks = [
+    buildTextChunk('metadata', metadata),
+    buildTextChunk('watermark', WATERMARK_TEXT),
+  ];
+  const withText = insertTextChunks(pngBytes, textChunks);
+
+  const pngBuffer = withText.buffer.slice(
+    withText.byteOffset,
+    withText.byteOffset + withText.byteLength
+  );
+  return new Blob([pngBuffer], { type: 'image/png' });
+};
+
 /**
  * Generates a PDF blob from pattern data
  * Minimal implementation for testing - creates a simple PDF
@@ -43,7 +213,7 @@ export const WATERMARK_TEXT = 'Image-to-Pattern';
  * @returns Promise<Blob> containing the PDF
  */
 export const generatePdfBlob = async (
-  data: any,
+  _data: PatternData,
   options: { pageSize: string; includeLegend: boolean }
 ): Promise<Blob> => {
   // Simple implementation: create a minimal PDF
