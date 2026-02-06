@@ -5,6 +5,11 @@ import React from 'react';
 import App from '../../../src/App';
 import { mockPatternData } from '../../helpers/mockData';
 
+// Enable vitest globals
+declare global {
+  var URL: typeof globalThis.URL;
+}
+
 /**
  * Scenario 5: Reasonable file size
  * 
@@ -28,7 +33,7 @@ describe('Scenario 5: Reasonable file size', () => {
   };
 
   beforeEach(() => {
-    global.fetch = vi.fn(() =>
+    globalThis.fetch = vi.fn(() =>
       Promise.resolve({
         ok: true,
         json: () => Promise.resolve(mockPatternData),
@@ -38,12 +43,12 @@ describe('Scenario 5: Reasonable file size', () => {
     user = userEvent.setup();
     lastBlobSize = 0;
 
-    global.URL.createObjectURL = vi.fn((blob: Blob) => {
+    globalThis.URL.createObjectURL = vi.fn((blob: Blob) => {
       lastBlobSize = blob.size;
       return 'blob:mock-url';
     });
 
-    global.URL.revokeObjectURL = vi.fn();
+    globalThis.URL.revokeObjectURL = vi.fn();
 
     originalCreateElement = document.createElement.bind(document);
     vi.spyOn(document, 'createElement').mockImplementation((tagName: string) => {
@@ -61,7 +66,9 @@ describe('Scenario 5: Reasonable file size', () => {
     const pngExportButton = await screen.findByRole('button', { name: /export.*png/i });
     await user.click(pngExportButton);
 
-    expect(lastBlobSize).toBeGreaterThan(0);
+    await waitFor(() => {
+      expect(lastBlobSize).toBeGreaterThan(0);
+    });
     expect(lastBlobSize).toBeLessThan(500 * 1024);
   });
 

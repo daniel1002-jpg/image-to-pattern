@@ -29,19 +29,19 @@ describe('Scenario 2: Export PDF', () => {
   };
 
   beforeEach(() => {
-    global.fetch = vi.fn(() =>
+    vi.stubGlobal('fetch', vi.fn(() =>
       Promise.resolve({
         ok: true,
         json: () => Promise.resolve(mockPatternData),
       })
-    ) as unknown as typeof fetch;
+    ) as unknown as typeof fetch);
 
     user = userEvent.setup();
     linkElement = null;
 
     // Mock URL.createObjectURL and URL.revokeObjectURL
-    global.URL.createObjectURL = vi.fn(() => 'blob:mock-url');
-    global.URL.revokeObjectURL = vi.fn();
+    (window.URL as any).createObjectURL = vi.fn(() => 'blob:mock-url');
+    (window.URL as any).revokeObjectURL = vi.fn();
 
     // Store original createElement
     originalCreateElement = document.createElement.bind(document);
@@ -124,9 +124,9 @@ describe('Scenario 2: Export PDF', () => {
     const confirmButton = await screen.findByRole('button', { name: /confirm/i });
     await user.click(confirmButton);
 
-    // Verify download was triggered with correct filename format
-    // Filename should be: pattern-YYYY-MM-DD-HHmmss.pdf
-    expect(linkElement?.download).toMatch(/^pattern-\d{4}-\d{2}-\d{2}-\d{6}\.pdf$/);
+    await waitFor(() => {
+      expect(linkElement?.download).toMatch(/^pattern-\d{4}-\d{2}-\d{2}-\d{6}\.pdf$/);
+    });
   });
 
   it('should use blob URL for PDF download', async () => {
@@ -139,7 +139,7 @@ describe('Scenario 2: Export PDF', () => {
     await user.click(confirmButton);
 
     // Verify blob URL was created and used
-    expect(global.URL.createObjectURL).toHaveBeenCalled();
+    expect((window.URL as any).createObjectURL).toHaveBeenCalled();
     expect(linkElement?.href).toBe('blob:mock-url');
   });
 
@@ -153,7 +153,7 @@ describe('Scenario 2: Export PDF', () => {
     await user.click(confirmButton);
 
     // Verify blob URL was revoked to free memory
-    expect(global.URL.revokeObjectURL).toHaveBeenCalledWith('blob:mock-url');
+    expect((window.URL as any).revokeObjectURL).toHaveBeenCalledWith('blob:mock-url');
   });
 
   it('should close modal after successful PDF export', async () => {
@@ -208,6 +208,6 @@ describe('Scenario 2: Export PDF', () => {
     expect(modal).not.toBeInTheDocument();
 
     // Download should not have been triggered
-    expect(global.URL.createObjectURL).not.toHaveBeenCalled();
+    expect((window.URL as any).createObjectURL).not.toHaveBeenCalled();
   });
 });

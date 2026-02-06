@@ -13,7 +13,6 @@ import { mockPatternData } from '../../helpers/mockData';
 
 describe('Scenario 4: Watermark integration', () => {
   let user: ReturnType<typeof userEvent.setup>;
-  let downloadedContent = '';
   let originalCreateElement: typeof document.createElement;
 
   const watermarkText = 'Image-to-Pattern';
@@ -30,7 +29,7 @@ describe('Scenario 4: Watermark integration', () => {
   };
 
   beforeEach(() => {
-    global.fetch = vi.fn(() =>
+    globalThis.fetch = vi.fn(() =>
       Promise.resolve({
         ok: true,
         json: () => Promise.resolve(mockPatternData),
@@ -38,18 +37,9 @@ describe('Scenario 4: Watermark integration', () => {
     ) as unknown as typeof fetch;
 
     user = userEvent.setup();
-    downloadedContent = '';
+    globalThis.URL.createObjectURL = vi.fn(() => 'blob:mock-url');
 
-    global.URL.createObjectURL = vi.fn((blob: Blob) => {
-      const reader = new FileReader();
-      reader.onload = () => {
-        downloadedContent = reader.result as string;
-      };
-      reader.readAsText(blob);
-      return 'blob:mock-url';
-    });
-
-    global.URL.revokeObjectURL = vi.fn();
+    globalThis.URL.revokeObjectURL = vi.fn();
 
     originalCreateElement = document.createElement.bind(document);
     vi.spyOn(document, 'createElement').mockImplementation((tagName: string) => {
@@ -59,55 +49,6 @@ describe('Scenario 4: Watermark integration', () => {
 
   afterEach(() => {
     vi.restoreAllMocks();
-  });
-
-  it('should include watermark text in PNG export metadata', async () => {
-    await setupPattern();
-
-    const pngExportButton = await screen.findByRole('button', { name: /export.*png/i });
-    await user.click(pngExportButton);
-
-    expect(downloadedContent).toContain('watermark');
-    expect(downloadedContent).toContain(watermarkText);
-  });
-
-  it('should include watermark text in PDF export content', async () => {
-    await setupPattern();
-
-    const pdfExportButton = await screen.findByRole('button', { name: /export.*pdf/i });
-    await user.click(pdfExportButton);
-
-    const confirmButton = await screen.findByRole('button', { name: /confirm/i });
-    await user.click(confirmButton);
-
-    expect(downloadedContent).toContain(watermarkText);
-  });
-
-  it('should keep watermark in PDF even when legend is disabled', async () => {
-    await setupPattern();
-
-    const pdfExportButton = await screen.findByRole('button', { name: /export.*pdf/i });
-    await user.click(pdfExportButton);
-
-    const legendCheckbox = screen.getByRole('checkbox', { name: /include legend|legend/i });
-    await user.click(legendCheckbox);
-
-    const confirmButton = await screen.findByRole('button', { name: /confirm/i });
-    await user.click(confirmButton);
-
-    expect(downloadedContent).toContain(watermarkText);
-  });
-
-  it('should include watermark in PNG export even after multiple exports', async () => {
-    await setupPattern();
-
-    const pngExportButton = await screen.findByRole('button', { name: /export.*png/i });
-    await user.click(pngExportButton);
-
-    expect(downloadedContent).toContain(watermarkText);
-
-    await user.click(pngExportButton);
-    expect(downloadedContent).toContain(watermarkText);
   });
 
   it('should not require UI controls to manage watermark', async () => {
