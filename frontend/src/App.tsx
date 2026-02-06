@@ -2,28 +2,23 @@ import { useState, useRef } from 'react';
 import { useRowTracker } from './hooks/useRowTracker';
 import { usePatternZoom } from './hooks/usePatternZoom';
 import { usePatternPan } from './hooks/usePatternPan';
+import { getExportTimestamp, downloadBlob, generatePdfBlob, generatePngBlob } from './utils/exportHelpers';
+import type { PatternData } from './utils/exportHelpers';
+import { PdfExportModal } from './components/PdfExportModal';
+import type { PdfExportOptions } from './components/PdfExportModal';
 import './App.css';
-
-interface PatternData {
-  status: string;
-  dimensions: {
-    width: number;
-    height: number;
-  };
-  palette: string[];
-  grid: number[][];
-}
 
 function App() {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [pattern, setPattern] = useState<PatternData | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [showPdfModal, setShowPdfModal] = useState(false);
   
   // Configuración del patrón
   const [width, setWidth] = useState(50);
   const [nColors, setNColors] = useState(5);
   
-  // Tracker de la fila activa (antigua funcionalidad)
+  // Tracker de la fila activa
   const [activeRow, setActiveRow] = useState<number | null>(null);
   
   // Custom hook para gestionar el tracker de filas completadas
@@ -75,6 +70,37 @@ function App() {
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const handleExportPng = async () => {
+    if (!pattern) return;
+
+    const blob = await generatePngBlob(pattern, rowTracker.completedRows);
+    const filename = `pattern-${getExportTimestamp()}.png`;
+    
+    downloadBlob(blob, filename);
+  };
+
+  const handleExportPdfClick = () => {
+    setShowPdfModal(true);
+  };
+
+  const handlePdfExportConfirm = async (options: PdfExportOptions) => {
+    if (!pattern) return;
+
+    try {
+      const blob = await generatePdfBlob(pattern, options, rowTracker.completedRows);
+      const filename = `pattern-${getExportTimestamp()}.pdf`;
+      downloadBlob(blob, filename);
+      setShowPdfModal(false);
+    } catch (error) {
+      console.error('Error exporting PDF:', error);
+      alert('Error exporting PDF');
+    }
+  };
+
+  const handlePdfExportCancel = () => {
+    setShowPdfModal(false);
   };
 
   return (
@@ -138,36 +164,55 @@ function App() {
           {/* PATRÓN INTERACTIVO */}
           <div className="pattern-viewer">
             <h3>Vista Previa (Click en una fila para marcar progreso)</h3>
-            
-            {/* Zoom controls */}
-            <div className="zoom-controls">
-              <button 
-                onClick={zoom.zoomOut}
-                disabled={!zoom.canZoomOut}
-                aria-label="Zoom out"
-                title="Zoom out"
-              >
-                −
-              </button>
-              <div className="zoom-indicator" data-testid="zoom-indicator">
-                {zoom.zoomLevel}%
+
+            <div className="pattern-toolbar">
+              <div className="export-controls">
+                <button
+                  onClick={handleExportPng}
+                  aria-label="Export PNG"
+                  title="Export PNG"
+                >
+                  Export PNG
+                </button>
+                <button
+                  onClick={handleExportPdfClick}
+                  aria-label="Export PDF"
+                  title="Export PDF"
+                >
+                  Export PDF
+                </button>
               </div>
-              <button 
-                onClick={zoom.zoomIn}
-                disabled={!zoom.canZoomIn}
-                aria-label="Zoom in"
-                title="Zoom in"
-              >
-                +
-              </button>
-              <button
-                onClick={zoom.resetZoom}
-                disabled={zoom.zoomLevel === 100}
-                aria-label="Reset Zoom"
-                title="Reset Zoom"
-              >
-                Reset
-              </button>
+
+              {/* Zoom controls */}
+              <div className="zoom-controls">
+                <button 
+                  onClick={zoom.zoomOut}
+                  disabled={!zoom.canZoomOut}
+                  aria-label="Zoom out"
+                  title="Zoom out"
+                >
+                  −
+                </button>
+                <div className="zoom-indicator" data-testid="zoom-indicator">
+                  {zoom.zoomLevel}%
+                </div>
+                <button 
+                  onClick={zoom.zoomIn}
+                  disabled={!zoom.canZoomIn}
+                  aria-label="Zoom in"
+                  title="Zoom in"
+                >
+                  +
+                </button>
+                <button
+                  onClick={zoom.resetZoom}
+                  disabled={zoom.zoomLevel === 100}
+                  aria-label="Reset Zoom"
+                  title="Reset Zoom"
+                >
+                  Reset
+                </button>
+              </div>
             </div>
             
             <div 
@@ -184,6 +229,8 @@ function App() {
                 ref={patternGridRef}
                 data-testid="pattern-grid"
                 className="grid-container"
+                role="img"
+                aria-label="Pattern preview"
                 onDoubleClick={zoom.resetZoom}
                 style={{
                   gridTemplateColumns: `repeat(${pattern.dimensions.width}, 1fr)`,
@@ -234,6 +281,10 @@ function App() {
             )}
           </div>
         </div>
+      )}
+      
+      {showPdfModal && (
+        <PdfExportModal onConfirm={handlePdfExportConfirm} onCancel={handlePdfExportCancel} />
       )}
     </div>
   );

@@ -60,6 +60,20 @@ npm run dev
 
 Aplicación en: `http://localhost:5173`
 
+### Levantar Backend + Frontend juntos
+
+Una vez instaladas las dependencias del backend y frontend, puedes iniciar ambos con:
+
+```bash
+python scripts/dev.py
+```
+
+El script usará el Python del entorno virtual `backend/venv` si existe.
+
+Esto inicia:
+- Frontend: `http://localhost:5173`
+- Backend: `http://localhost:8000`
+
 ## 📁 Estructura del Proyecto
 
 ```
