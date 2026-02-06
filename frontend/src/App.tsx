@@ -165,52 +165,54 @@ function App() {
           <div className="pattern-viewer">
             <h3>Vista Previa (Click en una fila para marcar progreso)</h3>
 
-            <div className="export-controls">
-              <button
-                onClick={handleExportPng}
-                aria-label="Export PNG"
-                title="Export PNG"
-              >
-                Export PNG
-              </button>
-              <button
-                onClick={handleExportPdfClick}
-                aria-label="Export PDF"
-                title="Export PDF"
-              >
-                Export PDF
-              </button>
-            </div>
-            
-            {/* Zoom controls */}
-            <div className="zoom-controls">
-              <button 
-                onClick={zoom.zoomOut}
-                disabled={!zoom.canZoomOut}
-                aria-label="Zoom out"
-                title="Zoom out"
-              >
-                −
-              </button>
-              <div className="zoom-indicator" data-testid="zoom-indicator">
-                {zoom.zoomLevel}%
+            <div className="pattern-toolbar">
+              <div className="export-controls">
+                <button
+                  onClick={handleExportPng}
+                  aria-label="Export PNG"
+                  title="Export PNG"
+                >
+                  Export PNG
+                </button>
+                <button
+                  onClick={handleExportPdfClick}
+                  aria-label="Export PDF"
+                  title="Export PDF"
+                >
+                  Export PDF
+                </button>
               </div>
-              <button 
-                onClick={zoom.zoomIn}
-                disabled={!zoom.canZoomIn}
-                aria-label="Zoom in"
-                title="Zoom in"
-              >
-                +
-              </button>
-              <button
-                onClick={zoom.resetZoom}
-                disabled={zoom.zoomLevel === 100}
-                aria-label="Reset Zoom"
-                title="Reset Zoom"
-              >
-                Reset
-              </button>
+
+              {/* Zoom controls */}
+              <div className="zoom-controls">
+                <button 
+                  onClick={zoom.zoomOut}
+                  disabled={!zoom.canZoomOut}
+                  aria-label="Zoom out"
+                  title="Zoom out"
+                >
+                  −
+                </button>
+                <div className="zoom-indicator" data-testid="zoom-indicator">
+                  {zoom.zoomLevel}%
+                </div>
+                <button 
+                  onClick={zoom.zoomIn}
+                  disabled={!zoom.canZoomIn}
+                  aria-label="Zoom in"
+                  title="Zoom in"
+                >
+                  +
+                </button>
+                <button
+                  onClick={zoom.resetZoom}
+                  disabled={zoom.zoomLevel === 100}
+                  aria-label="Reset Zoom"
+                  title="Reset Zoom"
+                >
+                  Reset
+                </button>
+              </div>
             </div>
             
             <div 
