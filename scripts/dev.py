@@ -8,6 +8,7 @@ from pathlib import Path
 ROOT_DIR = Path(__file__).resolve().parent.parent
 BACKEND_DIR = ROOT_DIR / "backend"
 FRONTEND_DIR = ROOT_DIR / "frontend"
+BACKEND_VENV_PY = BACKEND_DIR / "venv" / "bin" / "python"
 
 processes: list[subprocess.Popen] = []
 
@@ -30,9 +31,10 @@ def shutdown() -> None:
 def main() -> int:
     try:
         print("Starting backend...")
+        backend_python = str(BACKEND_VENV_PY if BACKEND_VENV_PY.exists() else sys.executable)
         processes.append(
             start_process(
-                [sys.executable, "-m", "uvicorn", "main:app", "--reload", "--port", "8000"],
+                [backend_python, "-m", "uvicorn", "main:app", "--reload", "--port", "8000"],
                 BACKEND_DIR,
             )
         )
