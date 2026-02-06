@@ -22,7 +22,7 @@ describe('Integration: PNG export output', () => {
   };
 
   beforeEach(() => {
-    global.fetch = vi.fn(() =>
+    globalThis.fetch = vi.fn(() =>
       Promise.resolve({
         ok: true,
         json: () => Promise.resolve(mockPatternData),
@@ -32,11 +32,11 @@ describe('Integration: PNG export output', () => {
     user = userEvent.setup();
     capturedBlob = null;
 
-    global.URL.createObjectURL = vi.fn((blob: Blob) => {
+    globalThis.URL.createObjectURL = vi.fn((blob: Blob) => {
       capturedBlob = blob;
       return 'blob:mock-url';
     });
-    global.URL.revokeObjectURL = vi.fn();
+    globalThis.URL.revokeObjectURL = vi.fn();
 
     originalCreateElement = document.createElement.bind(document);
     vi.spyOn(document, 'createElement').mockImplementation((tagName: string) => {
