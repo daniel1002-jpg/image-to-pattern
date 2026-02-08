@@ -1,3 +1,5 @@
+import os
+
 from fastapi import FastAPI, UploadFile, File, Form, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from services.image_processor import process_image_to_pattern
@@ -5,10 +7,18 @@ from services.image_processor import process_image_to_pattern
 app = FastAPI()
 
 # --- CORS SETUP ---
-origins = [
-    "http://localhost:5173",
-    "http://localhost:8000"
-]
+def get_cors_origins() -> list[str]:
+    env_origins = os.getenv("FRONTEND_ORIGINS", "")
+    if env_origins.strip():
+        return [origin.strip() for origin in env_origins.split(",") if origin.strip()]
+
+    return [
+        "http://localhost:5173",
+        "http://localhost:8000",
+    ]
+
+
+origins = get_cors_origins()
 
 app.add_middleware(
     CORSMiddleware,

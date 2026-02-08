@@ -4,6 +4,11 @@ import { usePatternZoom } from './hooks/usePatternZoom';
 import { usePatternPan } from './hooks/usePatternPan';
 import './App.css';
 
+const getApiBaseUrl = () => {
+  const envBaseUrl = import.meta.env.VITE_API_BASE_URL;
+  return envBaseUrl ? envBaseUrl.replace(/\/$/, '') : 'http://127.0.0.1:8000';
+};
+
 interface PatternData {
   status: string;
   dimensions: {
@@ -61,7 +66,7 @@ function App() {
     formData.append('n_colors', nColors.toString());
 
     try {
-      const response = await fetch('http://127.0.0.1:8000/process-image/', {
+      const response = await fetch(`${getApiBaseUrl()}/process-image/`, {
         method: 'POST',
         body: formData,
       });
