@@ -81,14 +81,14 @@ Se ejecutan los tests del frontend en cada push a `main` y en PRs.
 ## 🌍 Deploy (placeholders)
 
 **Frontend (Vercel)**
-- URL publica: `https://<vercel-app>.vercel.app`
+- URL publica: `https://image-to-pattern.vercel.app`
 - Variable de entorno en Vercel:
-  - `VITE_API_BASE_URL=https://<render-service>.onrender.com`
+  - `VITE_API_BASE_URL=https://image-to-pattern.onrender.com`
 
 **Backend (Render - Free Tier)**
-- URL publica: `https://<render-service>.onrender.com`
+- URL publica: `https://image-to-pattern.onrender.com`
 - Variables de entorno en Render:
-  - `FRONTEND_ORIGINS=https://<vercel-app>.vercel.app`
+  - `FRONTEND_ORIGINS=https://image-to-pattern.vercel.app`
 
 > Nota: `FRONTEND_ORIGINS` acepta multiples dominios separados por coma.
 
