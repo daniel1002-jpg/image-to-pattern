@@ -74,6 +74,24 @@ Esto inicia:
 - Frontend: `http://localhost:5173`
 - Backend: `http://localhost:8000`
 
+## ✅ CI (GitHub Actions)
+
+Se ejecutan los tests del frontend en cada push a `main` y en PRs.
+
+## 🌍 Deploy (placeholders)
+
+**Frontend (Vercel)**
+- URL publica: `https://<vercel-app>.vercel.app`
+- Variable de entorno en Vercel:
+  - `VITE_API_BASE_URL=https://<render-service>.onrender.com`
+
+**Backend (Render - Free Tier)**
+- URL publica: `https://<render-service>.onrender.com`
+- Variables de entorno en Render:
+  - `FRONTEND_ORIGINS=https://<vercel-app>.vercel.app`
+
+> Nota: `FRONTEND_ORIGINS` acepta multiples dominios separados por coma.
+
 ## 📁 Estructura del Proyecto
 
 ```

@@ -8,6 +8,11 @@ import { PdfExportModal } from './components/PdfExportModal';
 import type { PdfExportOptions } from './components/PdfExportModal';
 import './App.css';
 
+const getApiBaseUrl = () => {
+  const envBaseUrl = import.meta.env.VITE_API_BASE_URL;
+  return envBaseUrl ? envBaseUrl.replace(/\/$/, '') : 'http://127.0.0.1:8000';
+};
+
 function App() {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [pattern, setPattern] = useState<PatternData | null>(null);
@@ -56,7 +61,7 @@ function App() {
     formData.append('n_colors', nColors.toString());
 
     try {
-      const response = await fetch('http://127.0.0.1:8000/process-image/', {
+      const response = await fetch(`${getApiBaseUrl()}/process-image/`, {
         method: 'POST',
         body: formData,
       });
