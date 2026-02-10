@@ -1,25 +1,13 @@
-import { render, screen, waitFor } from '@testing-library/react';
+import { screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import React from 'react';
-import App from '../../../src/App';
 import { mockPatternData } from '../../helpers/mockData';
+import { setupInitialPattern } from '../../helpers/testSetup';
 
 describe('Integration: PNG export output', () => {
   let user: ReturnType<typeof userEvent.setup>;
   let capturedBlob: Blob | null = null;
   let originalCreateElement: typeof document.createElement;
-
-  const setupPattern = async () => {
-    render(React.createElement(App));
-    const fileInput = screen.getByTitle('file') as HTMLInputElement;
-    const generateButton = screen.getByRole('button', { name: /generar patrón/i });
-    const file = new File(['mock'], 'test.png', { type: 'image/png' });
-
-    await user.upload(fileInput, file);
-    await waitFor(() => expect(generateButton).toBeEnabled());
-    await user.click(generateButton);
-  };
 
   beforeEach(() => {
     globalThis.fetch = vi.fn(() =>
@@ -40,7 +28,11 @@ describe('Integration: PNG export output', () => {
 
     originalCreateElement = document.createElement.bind(document);
     vi.spyOn(document, 'createElement').mockImplementation((tagName: string) => {
-      return originalCreateElement(tagName);
+      const element = originalCreateElement(tagName);
+      if (tagName === 'a') {
+        (element as HTMLAnchorElement).click = vi.fn();
+      }
+      return element;
     });
   });
 
@@ -49,7 +41,7 @@ describe('Integration: PNG export output', () => {
   });
 
   it('exports a valid PNG file (signature bytes)', async () => {
-    await setupPattern();
+    await setupInitialPattern(user);
 
     const pngExportButton = await screen.findByRole('button', { name: /export.*png/i });
     await user.click(pngExportButton);

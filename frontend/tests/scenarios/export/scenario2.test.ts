@@ -1,9 +1,8 @@
-import { render, screen, waitFor } from '@testing-library/react';
+import { screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import React from 'react';
-import App from '../../../src/App';
 import { mockPatternData } from '../../helpers/mockData';
+import { setupInitialPattern } from '../../helpers/testSetup';
 
 /**
  * Scenario 2: Export PDF
@@ -16,17 +15,6 @@ describe('Scenario 2: Export PDF', () => {
   let user: ReturnType<typeof userEvent.setup>;
   let linkElement: HTMLAnchorElement | null;
   let originalCreateElement: typeof document.createElement;
-
-  const setupPattern = async () => {
-    render(React.createElement(App));
-    const fileInput = screen.getByTitle('file') as HTMLInputElement;
-    const generateButton = screen.getByRole('button', { name: /generar patrón/i });
-    const file = new File(['mock'], 'test.png', { type: 'image/png' });
-
-    await user.upload(fileInput, file);
-    await waitFor(() => expect(generateButton).toBeEnabled());
-    await user.click(generateButton);
-  };
 
   beforeEach(() => {
     vi.stubGlobal('fetch', vi.fn(() =>
@@ -62,7 +50,7 @@ describe('Scenario 2: Export PDF', () => {
   });
 
   it('should display PDF export button after pattern generation', async () => {
-    await setupPattern();
+    await setupInitialPattern(user);
 
     // Wait for pattern to be generated and PDF export button to appear
     const pdfExportButton = await screen.findByRole('button', { name: /export.*pdf/i });
@@ -70,7 +58,7 @@ describe('Scenario 2: Export PDF', () => {
   });
 
   it('should open options modal when clicking PDF export button', async () => {
-    await setupPattern();
+    await setupInitialPattern(user);
 
     const pdfExportButton = await screen.findByRole('button', { name: /export.*pdf/i });
     await user.click(pdfExportButton);
@@ -82,7 +70,7 @@ describe('Scenario 2: Export PDF', () => {
   });
 
   it('should allow selection of page size in modal', async () => {
-    await setupPattern();
+    await setupInitialPattern(user);
 
     const pdfExportButton = await screen.findByRole('button', { name: /export.*pdf/i });
     await user.click(pdfExportButton);
@@ -97,7 +85,7 @@ describe('Scenario 2: Export PDF', () => {
   });
 
   it('should allow toggling legend inclusion', async () => {
-    await setupPattern();
+    await setupInitialPattern(user);
 
     const pdfExportButton = await screen.findByRole('button', { name: /export.*pdf/i });
     await user.click(pdfExportButton);
@@ -115,7 +103,7 @@ describe('Scenario 2: Export PDF', () => {
   });
 
   it('should trigger PDF download with correct filename when confirming modal', async () => {
-    await setupPattern();
+    await setupInitialPattern(user);
 
     const pdfExportButton = await screen.findByRole('button', { name: /export.*pdf/i });
     await user.click(pdfExportButton);
@@ -130,7 +118,7 @@ describe('Scenario 2: Export PDF', () => {
   });
 
   it('should use blob URL for PDF download', async () => {
-    await setupPattern();
+    await setupInitialPattern(user);
 
     const pdfExportButton = await screen.findByRole('button', { name: /export.*pdf/i });
     await user.click(pdfExportButton);
@@ -144,7 +132,7 @@ describe('Scenario 2: Export PDF', () => {
   });
 
   it('should revoke blob URL after PDF download', async () => {
-    await setupPattern();
+    await setupInitialPattern(user);
 
     const pdfExportButton = await screen.findByRole('button', { name: /export.*pdf/i });
     await user.click(pdfExportButton);
@@ -157,7 +145,7 @@ describe('Scenario 2: Export PDF', () => {
   });
 
   it('should close modal after successful PDF export', async () => {
-    await setupPattern();
+    await setupInitialPattern(user);
 
     const pdfExportButton = await screen.findByRole('button', { name: /export.*pdf/i });
     await user.click(pdfExportButton);
@@ -176,7 +164,7 @@ describe('Scenario 2: Export PDF', () => {
   });
 
   it('should respect selected page size option in PDF', async () => {
-    await setupPattern();
+    await setupInitialPattern(user);
 
     const pdfExportButton = await screen.findByRole('button', { name: /export.*pdf/i });
     await user.click(pdfExportButton);
@@ -194,7 +182,7 @@ describe('Scenario 2: Export PDF', () => {
   });
 
   it('should allow canceling PDF export without downloading', async () => {
-    await setupPattern();
+    await setupInitialPattern(user);
 
     const pdfExportButton = await screen.findByRole('button', { name: /export.*pdf/i });
     await user.click(pdfExportButton);
