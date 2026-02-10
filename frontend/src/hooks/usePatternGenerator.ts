@@ -43,7 +43,7 @@ export function usePatternGenerator() {
       setPattern(data);
     } catch (error) {
       console.error(error);
-      alert('Error al procesar. Revisa que el backend este corriendo.');
+      alert('Error al procesar. Revisa que el backend esté corriendo.');
     } finally {
       setIsLoading(false);
     }
