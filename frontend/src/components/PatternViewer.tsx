@@ -1,16 +1,8 @@
 import type { RefObject } from 'react';
 import type { PatternData } from '../utils/exportHelpers';
+import type { RowTrackerState } from '../hooks/useRowTracker';
 import { PatternToolbar } from './PatternToolbar';
 import { SizeCalculator } from './SizeCalculator';
-
-interface RowTrackerState {
-  completedRows: Set<number>;
-  completedCount: number;
-  totalRows: number;
-  isRowCompleted: (rowIndex: number) => boolean;
-  toggleRowCompletion: (rowIndex: number) => void;
-  resetProgress: () => void;
-}
 
 interface PatternViewerProps {
   pattern: PatternData;
@@ -87,7 +79,7 @@ export function PatternViewer({
           ref={patternGridRef}
           data-testid="pattern-grid"
           className="grid-container"
-          role="img"
+          role="grid"
           aria-label="Pattern preview"
           onDoubleClick={zoom.resetZoom}
           style={{
@@ -103,13 +95,15 @@ export function PatternViewer({
               const isCompleted = rowTracker.isRowCompleted(rowIndex);
 
               return (
-                <div
+                <button
+                  type="button"
                   key={`${rowIndex}-${colIndex}`}
                   className={`pixel-cell ${isDimmed ? 'dimmed' : ''} ${isCompleted ? 'completed-row' : ''}`}
                   style={{ backgroundColor: pattern.palette[colorIndex] }}
                   onClick={() => rowTracker.toggleRowCompletion(rowIndex)}
                   title={`Fila ${rowIndex + 1}, Color ${colorIndex}`}
                   data-testid={`pixel-cell-${rowIndex}-${colIndex}`}
+                  aria-pressed={isCompleted}
                 />
               );
             })

@@ -24,40 +24,42 @@ export function ControlsPanel({
   return (
     <div className="controls-panel">
       <div className="control-group">
-        <label>1. Sube tu imagen</label>
-        <input title="file" type="file" accept="image/*" onChange={onFileChange} />
+        <label htmlFor="pattern-file">1. Sube tu imagen</label>
+        <input id="pattern-file" title="file" type="file" accept="image/*" onChange={onFileChange} />
       </div>
 
       <div className="control-group">
         <label>2. Configura el Patrón</label>
 
         <div className="slider-container">
-          <span>
+          <label htmlFor="pattern-width">
             Ancho (puntos): <strong>{width}</strong>
-          </span>
+          </label>
           <input
+            id="pattern-width"
             title="range"
             type="range"
             min="20"
             max="100"
             step="5"
             value={width}
-            onChange={(e) => onWidthChange(parseInt(e.target.value))}
+            onChange={(e) => onWidthChange(Number(e.target.value))}
           />
         </div>
 
         <div className="slider-container">
-          <span>
+          <label htmlFor="pattern-colors">
             Colores: <strong>{nColors}</strong>
-          </span>
+          </label>
           <input
+            id="pattern-colors"
             title="range"
             type="range"
             min="2"
             max="16"
             step="1"
             value={nColors}
-            onChange={(e) => onColorsChange(parseInt(e.target.value))}
+            onChange={(e) => onColorsChange(Number(e.target.value))}
           />
         </div>
       </div>

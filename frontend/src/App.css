@@ -76,7 +76,15 @@
 
 .pixel-cell {
   aspect-ratio: 1/1; width: 100%; cursor: crosshair;
+  border: none;
+  padding: 0;
+  background: transparent;
   transition: opacity 0.2s ease;
+}
+
+.pixel-cell:focus-visible {
+  outline: 2px solid #ffffff;
+  outline-offset: -2px;
 }
 
 /* EFECTO TRACKER */

@@ -1,16 +1,8 @@
 import type { RefObject } from 'react';
 import type { PatternData } from '../utils/exportHelpers';
+import type { RowTrackerState } from '../hooks/useRowTracker';
 import { PaletteLegend } from './PaletteLegend';
 import { PatternViewer } from './PatternViewer';
-
-interface RowTrackerState {
-  completedRows: Set<number>;
-  completedCount: number;
-  totalRows: number;
-  isRowCompleted: (rowIndex: number) => boolean;
-  toggleRowCompletion: (rowIndex: number) => void;
-  resetProgress: () => void;
-}
 
 interface PatternWorkspaceProps {
   pattern: PatternData;

@@ -1,4 +1,5 @@
 import { useState, useRef } from 'react';
+import type { ChangeEvent } from 'react';
 import { useRowTracker } from './hooks/useRowTracker';
 import { usePatternZoom } from './hooks/usePatternZoom';
 import { usePatternPan } from './hooks/usePatternPan';
@@ -36,7 +37,7 @@ function App() {
   const zoom = usePatternZoom(patternGridRef, Boolean(pattern));
   const pan = usePatternPan(patternContainerRef, zoom.zoomLevel);
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
     handleFileChangeBase(e);
     if (e.target.files && e.target.files[0]) {
       zoom.resetZoom();

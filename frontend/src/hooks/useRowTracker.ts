@@ -50,3 +50,5 @@ export function useRowTracker(totalRows: number) {
     clearProgress,
   };
 }
+
+export type RowTrackerState = ReturnType<typeof useRowTracker>;
