@@ -79,7 +79,32 @@
   border: none;
   padding: 0;
   background: transparent;
+  border-radius: 0;
+  box-sizing: border-box;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  appearance: none;
   transition: opacity 0.2s ease;
+}
+
+.pixel-cell[data-col]:nth-of-type(10n) {
+  border-right-color: rgba(0, 0, 0, 0.35);
+}
+
+.pixel-cell[data-row]:nth-child(n) {
+  /* Placeholder to keep selector grouping clear */
+}
+
+.pixel-cell[data-row="9"],
+.pixel-cell[data-row="19"],
+.pixel-cell[data-row="29"],
+.pixel-cell[data-row="39"],
+.pixel-cell[data-row="49"],
+.pixel-cell[data-row="59"],
+.pixel-cell[data-row="69"],
+.pixel-cell[data-row="79"],
+.pixel-cell[data-row="89"],
+.pixel-cell[data-row="99"] {
+  border-bottom-color: rgba(0, 0, 0, 0.35);
 }
 
 .pixel-cell:focus-visible {

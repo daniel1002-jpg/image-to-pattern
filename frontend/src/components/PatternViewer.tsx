@@ -103,6 +103,8 @@ export function PatternViewer({
                   onClick={() => rowTracker.toggleRowCompletion(rowIndex)}
                   title={`Fila ${rowIndex + 1}, Color ${colorIndex}`}
                   data-testid={`pixel-cell-${rowIndex}-${colIndex}`}
+                  data-row={rowIndex}
+                  data-col={colIndex}
                   aria-pressed={isCompleted}
                 />
               );
