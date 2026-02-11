@@ -1,9 +1,8 @@
-import { render, screen, waitFor } from '@testing-library/react';
+import { screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import React from 'react';
-import App from '../../../src/App';
 import { mockPatternData } from '../../helpers/mockData';
+import { setupInitialPattern } from '../../helpers/testSetup';
 
 /**
  * Scenario 4: Watermark integration
@@ -16,17 +15,6 @@ describe('Scenario 4: Watermark integration', () => {
   let originalCreateElement: typeof document.createElement;
 
   const watermarkText = 'Image-to-Pattern';
-
-  const setupPattern = async () => {
-    render(React.createElement(App));
-    const fileInput = screen.getByTitle('file') as HTMLInputElement;
-    const generateButton = screen.getByRole('button', { name: /generar patrón/i });
-    const file = new File(['mock'], 'test.png', { type: 'image/png' });
-
-    await user.upload(fileInput, file);
-    await waitFor(() => expect(generateButton).toBeEnabled());
-    await user.click(generateButton);
-  };
 
   beforeEach(() => {
     globalThis.fetch = vi.fn(() =>
@@ -52,7 +40,7 @@ describe('Scenario 4: Watermark integration', () => {
   });
 
   it('should not require UI controls to manage watermark', async () => {
-    await setupPattern();
+    await setupInitialPattern(user);
 
     expect(screen.queryByText(watermarkText)).not.toBeInTheDocument();
     expect(screen.queryByRole('checkbox', { name: /watermark/i })).not.toBeInTheDocument();

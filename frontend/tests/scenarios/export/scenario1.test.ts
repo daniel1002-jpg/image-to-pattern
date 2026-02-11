@@ -1,9 +1,8 @@
-import { render, screen, waitFor } from '@testing-library/react';
+import { screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import React from 'react';
-import App from '../../../src/App';
 import { mockPatternData } from '../../helpers/mockData';
+import { setupInitialPattern } from '../../helpers/testSetup';
 
 /**
  * Scenario 1: Export PNG
@@ -17,19 +16,8 @@ describe('Scenario 1: Export PNG', () => {
   let linkElement: HTMLAnchorElement | null;
   let originalCreateElement: typeof document.createElement;
 
-  const setupPattern = async () => {
-    render(React.createElement(App));
-    const fileInput = screen.getByTitle('file') as HTMLInputElement;
-    const generateButton = screen.getByRole('button', { name: /generar patrón/i });
-    const file = new File(['mock'], 'test.png', { type: 'image/png' });
-
-    await user.upload(fileInput, file);
-    await waitFor(() => expect(generateButton).toBeEnabled());
-    await user.click(generateButton);
-  };
-
   beforeEach(() => {
-    global.fetch = vi.fn(() =>
+    globalThis.fetch = vi.fn(() =>
       Promise.resolve({
         ok: true,
         json: () => Promise.resolve(mockPatternData),
@@ -40,8 +28,8 @@ describe('Scenario 1: Export PNG', () => {
     linkElement = null;
     
     // Mock URL.createObjectURL and URL.revokeObjectURL
-    global.URL.createObjectURL = vi.fn(() => 'blob:mock-url');
-    global.URL.revokeObjectURL = vi.fn();
+    globalThis.URL.createObjectURL = vi.fn(() => 'blob:mock-url');
+    globalThis.URL.revokeObjectURL = vi.fn();
     
     // Store original createElement
     originalCreateElement = document.createElement.bind(document);
@@ -62,7 +50,7 @@ describe('Scenario 1: Export PNG', () => {
   });
 
   it('should display PNG export button after pattern generation', async () => {
-    await setupPattern();
+    await setupInitialPattern(user);
     
     // Wait for pattern to be generated and PNG export button to appear
     const pngExportButton = await screen.findByRole('button', { name: /export.*png/i });
@@ -70,7 +58,7 @@ describe('Scenario 1: Export PNG', () => {
   });
 
   it('should trigger PNG download with correct filename format', async () => {
-    await setupPattern();
+    await setupInitialPattern(user);
     
     // Click PNG export button
     const pngExportButton = await screen.findByRole('button', { name: /export.*png/i });
@@ -82,19 +70,19 @@ describe('Scenario 1: Export PNG', () => {
   });
 
   it('should use blob URL for PNG download', async () => {
-    await setupPattern();
+    await setupInitialPattern(user);
     
     // Click PNG export button
     const pngExportButton = await screen.findByRole('button', { name: /export.*png/i });
     await user.click(pngExportButton);
     
     // Verify blob URL was created and used
-    expect(global.URL.createObjectURL).toHaveBeenCalled();
+    expect(globalThis.URL.createObjectURL).toHaveBeenCalled();
     expect(linkElement?.href).toBe('blob:mock-url');
   });
 
   it('should trigger link click to download PNG', async () => {
-    await setupPattern();
+    await setupInitialPattern(user);
     
     // Click PNG export button
     const pngExportButton = await screen.findByRole('button', { name: /export.*png/i });
@@ -105,18 +93,18 @@ describe('Scenario 1: Export PNG', () => {
   });
 
   it('should revoke blob URL after download', async () => {
-    await setupPattern();
+    await setupInitialPattern(user);
     
     // Click PNG export button
     const pngExportButton = await screen.findByRole('button', { name: /export.*png/i });
     await user.click(pngExportButton);
     
     // Verify blob URL was revoked to free memory
-    expect(global.URL.revokeObjectURL).toHaveBeenCalledWith('blob:mock-url');
+    expect(globalThis.URL.revokeObjectURL).toHaveBeenCalledWith('blob:mock-url');
   });
 
   it('should trigger PNG export after pattern is generated', async () => {
-    await setupPattern();
+    await setupInitialPattern(user);
 
     const pngExportButton = await screen.findByRole('button', { name: /export.*png/i });
     await user.click(pngExportButton);

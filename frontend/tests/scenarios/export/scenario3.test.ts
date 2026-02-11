@@ -1,9 +1,8 @@
-import { render, screen, waitFor } from '@testing-library/react';
+import { screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import React from 'react';
-import App from '../../../src/App';
 import { mockPatternData } from '../../helpers/mockData';
+import { setupInitialPattern } from '../../helpers/testSetup';
 
 /**
  * Scenario 3: Include Pattern Metadata and Legend in Exports
@@ -20,17 +19,6 @@ describe('Scenario 3: Pattern Metadata and Legend in Exports', () => {
   let user: ReturnType<typeof userEvent.setup>;
   let linkElement: HTMLAnchorElement | null;
   let originalCreateElement: typeof document.createElement;
-
-  const setupPattern = async () => {
-    render(React.createElement(App));
-    const fileInput = screen.getByTitle('file') as HTMLInputElement;
-    const generateButton = screen.getByRole('button', { name: /generar patrón/i });
-    const file = new File(['mock'], 'test.png', { type: 'image/png' });
-
-    await user.upload(fileInput, file);
-    await waitFor(() => expect(generateButton).toBeEnabled());
-    await user.click(generateButton);
-  };
 
   beforeEach(() => {
     globalThis.fetch = vi.fn(() =>
@@ -66,14 +54,14 @@ describe('Scenario 3: Pattern Metadata and Legend in Exports', () => {
   });
 
   it('should display pattern dimensions in the UI', async () => {
-    await setupPattern();
+    await setupInitialPattern(user);
 
     const patternGrid = screen.getByTestId('pattern-grid');
     expect(patternGrid).toBeInTheDocument();
   });
 
   it('should include generation timestamp in PNG export filename', async () => {
-    await setupPattern();
+    await setupInitialPattern(user);
 
     const pngExportButton = await screen.findByRole('button', { name: /export.*png/i });
     await user.click(pngExportButton);
@@ -84,7 +72,7 @@ describe('Scenario 3: Pattern Metadata and Legend in Exports', () => {
   });
 
   it('should include legend in PDF when legend option is enabled', async () => {
-    await setupPattern();
+    await setupInitialPattern(user);
 
     const pdfExportButton = await screen.findByRole('button', { name: /export.*pdf/i });
     await user.click(pdfExportButton);
@@ -101,7 +89,7 @@ describe('Scenario 3: Pattern Metadata and Legend in Exports', () => {
   });
 
   it('should exclude legend from PDF when legend option is disabled', async () => {
-    await setupPattern();
+    await setupInitialPattern(user);
 
     const pdfExportButton = await screen.findByRole('button', { name: /export.*pdf/i });
     await user.click(pdfExportButton);
@@ -118,7 +106,7 @@ describe('Scenario 3: Pattern Metadata and Legend in Exports', () => {
   });
 
   it('should display color legend with all palette colors', async () => {
-    await setupPattern();
+    await setupInitialPattern(user);
 
     // Verify palette section is displayed
     const paletteSection = screen.getByText(/Paleta/);
@@ -130,13 +118,13 @@ describe('Scenario 3: Pattern Metadata and Legend in Exports', () => {
   });
 
   it('should show the palette legend in the UI', async () => {
-    await setupPattern();
+    await setupInitialPattern(user);
 
     expect(screen.getByText(/Paleta/)).toBeInTheDocument();
   });
 
   it('should render the progress counter', async () => {
-    await setupPattern();
+    await setupInitialPattern(user);
 
     expect(screen.getByText(/filas completadas/i)).toBeInTheDocument();
   });
