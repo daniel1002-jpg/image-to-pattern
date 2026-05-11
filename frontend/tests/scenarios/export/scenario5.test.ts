@@ -1,9 +1,8 @@
-import { render, screen, waitFor } from '@testing-library/react';
+import { screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import React from 'react';
-import App from '../../../src/App';
 import { mockPatternData } from '../../helpers/mockData';
+import { setupInitialPattern } from '../../helpers/testSetup';
 
 // Enable vitest globals
 declare global {
@@ -20,17 +19,7 @@ describe('Scenario 5: Reasonable file size', () => {
   let user: ReturnType<typeof userEvent.setup>;
   let lastBlobSize = 0;
   let originalCreateElement: typeof document.createElement;
-
-  const setupPattern = async () => {
-    render(React.createElement(App));
-    const fileInput = screen.getByTitle('file') as HTMLInputElement;
-    const generateButton = screen.getByRole('button', { name: /generar patrón/i });
-    const file = new File(['mock'], 'test.png', { type: 'image/png' });
-
-    await user.upload(fileInput, file);
-    await waitFor(() => expect(generateButton).toBeEnabled());
-    await user.click(generateButton);
-  };
+  let linkElement: HTMLAnchorElement | null;
 
   beforeEach(() => {
     globalThis.fetch = vi.fn(() =>
@@ -42,6 +31,7 @@ describe('Scenario 5: Reasonable file size', () => {
 
     user = userEvent.setup();
     lastBlobSize = 0;
+    linkElement = null;
 
     globalThis.URL.createObjectURL = vi.fn((blob: Blob) => {
       lastBlobSize = blob.size;
@@ -52,7 +42,12 @@ describe('Scenario 5: Reasonable file size', () => {
 
     originalCreateElement = document.createElement.bind(document);
     vi.spyOn(document, 'createElement').mockImplementation((tagName: string) => {
-      return originalCreateElement(tagName);
+      const element = originalCreateElement(tagName);
+      if (tagName === 'a') {
+        linkElement = element as HTMLAnchorElement;
+        linkElement.click = vi.fn();
+      }
+      return element;
     });
   });
 
@@ -61,7 +56,7 @@ describe('Scenario 5: Reasonable file size', () => {
   });
 
   it('should keep PNG export under 500KB for typical patterns', async () => {
-    await setupPattern();
+    await setupInitialPattern(user);
 
     const pngExportButton = await screen.findByRole('button', { name: /export.*png/i });
     await user.click(pngExportButton);
@@ -73,7 +68,7 @@ describe('Scenario 5: Reasonable file size', () => {
   });
 
   it('should keep PDF export under 1MB for typical patterns', async () => {
-    await setupPattern();
+    await setupInitialPattern(user);
 
     const pdfExportButton = await screen.findByRole('button', { name: /export.*pdf/i });
     await user.click(pdfExportButton);
@@ -86,7 +81,7 @@ describe('Scenario 5: Reasonable file size', () => {
   });
 
   it('should keep PDF export under 1MB even with legend disabled', async () => {
-    await setupPattern();
+    await setupInitialPattern(user);
 
     const pdfExportButton = await screen.findByRole('button', { name: /export.*pdf/i });
     await user.click(pdfExportButton);

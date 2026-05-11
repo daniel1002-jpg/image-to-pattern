@@ -18,6 +18,9 @@ export async function setupInitialPattern(user: ReturnType<typeof userEvent.setu
   await user.upload(input, file);
 
   const generateButton = screen.getByRole('button', { name: /generar patrón/i });
+  await waitFor(() => {
+    expect(generateButton).toBeEnabled();
+  });
   await user.click(generateButton);
 
   await waitFor(() => {

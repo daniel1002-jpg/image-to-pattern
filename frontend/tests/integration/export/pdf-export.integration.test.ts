@@ -1,25 +1,13 @@
-import { render, screen, waitFor } from '@testing-library/react';
+import { screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import React from 'react';
-import App from '../../../src/App';
 import { mockPatternData } from '../../helpers/mockData';
+import { setupInitialPattern } from '../../helpers/testSetup';
 
 describe('Integration: PDF export output', () => {
   let user: ReturnType<typeof userEvent.setup>;
   let capturedBlob: Blob | null = null;
   let originalCreateElement: typeof document.createElement;
-
-  const setupPattern = async () => {
-    render(React.createElement(App));
-    const fileInput = screen.getByTitle('file') as HTMLInputElement;
-    const generateButton = screen.getByRole('button', { name: /generar patrón/i });
-    const file = new File(['mock'], 'test.png', { type: 'image/png' });
-
-    await user.upload(fileInput, file);
-    await waitFor(() => expect(generateButton).toBeEnabled());
-    await user.click(generateButton);
-  };
 
   const readBlob = (blob: Blob) =>
     new Promise<ArrayBuffer>((resolve, reject) => {
@@ -48,7 +36,11 @@ describe('Integration: PDF export output', () => {
 
     originalCreateElement = document.createElement.bind(document);
     vi.spyOn(document, 'createElement').mockImplementation((tagName: string) => {
-      return originalCreateElement(tagName);
+      const element = originalCreateElement(tagName);
+      if (tagName === 'a') {
+        (element as HTMLAnchorElement).click = vi.fn();
+      }
+      return element;
     });
   });
 
@@ -57,7 +49,7 @@ describe('Integration: PDF export output', () => {
   });
 
   it('exports a PDF that embeds the pattern image', async () => {
-    await setupPattern();
+    await setupInitialPattern(user);
 
     const pdfExportButton = await screen.findByRole('button', { name: /export.*pdf/i });
     await user.click(pdfExportButton);
