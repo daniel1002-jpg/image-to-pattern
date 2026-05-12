@@ -79,6 +79,7 @@ export function PatternViewer({
           ref={patternGridRef}
           data-testid="pattern-grid"
           className="grid-container"
+          role="grid"
           aria-label="Pattern preview"
           onDoubleClick={zoom.resetZoom}
           style={{

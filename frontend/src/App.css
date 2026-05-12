@@ -90,6 +90,10 @@
   border-right-color: rgba(0, 0, 0, 0.35);
 }
 
+.pixel-cell[data-row]:nth-child(n) {
+  /* Placeholder to keep selector grouping clear */
+}
+
 .pixel-cell[data-row="9"],
 .pixel-cell[data-row="19"],
 .pixel-cell[data-row="29"],
